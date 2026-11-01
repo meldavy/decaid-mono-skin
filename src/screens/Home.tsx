@@ -49,6 +49,8 @@ const MINI_TITLE_H = 34
 const CARD_STEP = 300
 const CARD_STEP_SHORT = 294
 const MAIN_HALF = 240 // half the main card's 480 px
+// Time to ready only once it's two digits: "HEATING · 300 S" doesn't fit the display's top line.
+const ttrLabel = (s: number) => (s > 0 && s <= 99 ? ` · ${s} S` : '')
 const SNAP_MS = 180 // a card swapped in mid-drag slides to its landing spot in this long
 const RESIST = 90 // past the first or last card, the strip gives at most this far
 const HEADLINE = { nolink: 'NO LINK', offline: 'NO MACHINE', stale: 'NO DATA', asleep: 'ASLEEP', heating: 'HEATING', ready: 'READY', busy: 'BUSY' } as const
@@ -263,7 +265,7 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
           {/* Heating is a wait: rust, with a dot spinner. */}
           <span className={`thermal${thermal === 'heating' ? ' heating' : ''}`}>
             {thermal === 'heating' && <DotSpinner color="var(--rust-on-display)" />}
-            <span data-testid="thermal">{HEADLINE[thermal]}{thermal === 'heating' && ttrSeconds(live.ttr, now) ? ` · ${ttrSeconds(live.ttr, now)} S` : ''}</span>
+            <span data-testid="thermal">{HEADLINE[thermal]}{thermal === 'heating' ? ttrLabel(ttrSeconds(live.ttr, now)) : ''}</span>
           </span>
           <span data-testid="home-clock">{clock(new Date(now), prefs.clock)}</span>
         </div>

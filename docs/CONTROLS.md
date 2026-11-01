@@ -109,7 +109,7 @@ Apply every line to every control while writing its scenarios; anything that app
 | ID | Scenario | Lvl |
 |---|---|---|
 | HOME-01 | Display shows live group / steam temperature, machine state, weight, water level | S |
-| HOME-02 | Heating → "heating" status and time-to-ready; ready status once in range; stale data never shows ready | S |
+| HOME-02 | Heating → "heating" status, and time-to-ready once it is 99 s or less; ready status once in range; stale data never shows ready | S |
 | HOME-03 | Carousel shows the five favourite slots from Streamline's shared store; empty slots shown as empty | S |
 | HOME-04 | Tap a side card → carousel centres it and it becomes the machine's profile (read back) | S |
 | HOME-05 | Swipe left / right; loads only the card it settles on (~0.5 s after the last swipe); Brew disabled until Decaid confirms | S |
