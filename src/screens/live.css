@@ -1,0 +1,56 @@
+.live { width: 100%; height: 100%; padding: var(--page-pad); display: flex; flex-direction: column; }
+.live-header { height: 196px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px; } /* fixed: stage names change size mid-shot */
+.live-title-row { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; }
+.live-title-row > .label { flex-shrink: 0; white-space: nowrap; }
+.live-title { font-size: 32px; line-height: 1.1; } /* clearly above the stage names (about 20 px) */
+.stages { position: relative; list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-start; overflow: hidden; scrollbar-width: none; }
+.stages::-webkit-scrollbar { display: none; }
+.stages.scrollable { overflow-x: auto; overscroll-behavior-x: contain; }
+.stage { flex-basis: 0; flex-shrink: 1; padding-right: 10px; display: flex; flex-direction: column; gap: 12px; }
+.stage:last-child { padding-right: 0; }
+.stage-rail { display: flex; align-items: center; gap: 6px; height: 12px; }
+.stage-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--taupe); }
+.stage-line { --dot: var(--taupe); position: relative; flex-grow: 1; height: 4px; background: radial-gradient(circle, var(--dot) 1.2px, transparent 1.5px) left center / 6px 4px repeat-x; }
+.stage-line-lit { --dot: var(--brown); position: absolute; left: 0; top: 0; bottom: 0; background: inherit; background-image: radial-gradient(circle, var(--dot) 1.2px, transparent 1.5px); }
+.stage.next .stage-dot { background: #e6dccc; }
+.stage.next .stage-line { --dot: #e6dccc; }
+.stage.current .stage-dot { background: transparent; border: 2px solid var(--brown); }
+.stage.current .stage-line { --dot: #d9c8ae; }
+.stage.current .stage-line-lit { --dot: var(--brown); }
+.stage-name { line-height: 1.05; color: var(--taupe); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: break-word; }
+.stage.current .stage-name { line-height: 0.95; letter-spacing: -0.03em; color: var(--ink); }
+.stage.next .stage-name, .stage.next .stage-meta { color: #9c8870; }
+/* The display takes the height left between header and buttons; its contents size to it. */
+/* The display takes the height left; inside, everything with dots is pinned to its 9 px grid from the
+   top-left (padding, column width and gaps are multiples of 9; heights are set in whole rows). */
+.live-display { flex: 1 1 auto; min-height: 0; margin: var(--gap-block) 0; border-radius: var(--radius-display); display: flex; flex-direction: column; gap: 18px; }
+.live-top { flex: 0 0 auto; min-height: 0; display: flex; gap: 36px; }
+.chart-fit { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; align-items: flex-start; }
+.live-numbers { width: 297px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.live-status { display: flex; align-items: center; gap: 10px; font-size: var(--dots-xs); letter-spacing: 0.08em; }
+.live-status .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.live-number { display: flex; flex-direction: column; gap: 8px; }
+.live-number .big { font-size: var(--big, var(--dots-xl)); line-height: 0.85; letter-spacing: -0.02em; } /* one size for time and weight, fitted to the column */
+.live-yield { display: flex; flex-direction: column; gap: 9px; }
+.yield-labels { height: 18px; align-items: center; }
+.yield-dots { display: block; }
+.yield-labels { display: flex; justify-content: space-between; }
+.live-bottom { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
+.live-readouts { display: flex; gap: 40px; }
+.readout-stack { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.readout { font-size: var(--dots-s); line-height: 1; color: var(--ink); }
+/* Room for 5 characters (e.g. 199.4 °F) so a value gaining a digit doesn't shift its neighbours. */
+.readout-stack .readout { min-width: 5ch; text-align: center; }
+.stage.done.reached .stage-name { color: var(--ink); }
+
+/* Short screens (e.g. 1024 × 600): a compact header so the display keeps enough room. */
+@media (max-height: 700px) {
+  .live-header { height: 164px; gap: 12px; }
+  .live-title { font-size: 28px; }
+  .stage { gap: 8px; }
+  .stage.current .stage-name { font-size: min(var(--stage-size, 40px), 32px) !important; }
+  .live-display { margin: 10px 0; }
+}
+/* Other stages reserve two lines for the name so the seconds / NOT REACHED lines align. */
+.stage-name.two-line { height: 2.1em; }
+@media (max-width: 1100px) { .live-numbers { width: 207px; } } /* 23 × 9 */

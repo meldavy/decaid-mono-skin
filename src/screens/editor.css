@@ -1,0 +1,106 @@
+.editor { width: 100%; height: 100%; padding: var(--page-pad); display: flex; flex-direction: column; gap: 14px; }
+.ed-header { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.ed-title { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 46%; }
+.ed-title-name { font-size: 32px; line-height: 1.05; letter-spacing: -0.02em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; overflow-wrap: anywhere; }
+.ed-title-name.small { font-size: 25px; -webkit-line-clamp: 2; }
+.ed-title-name.smaller { font-size: 21px; -webkit-line-clamp: 2; }
+.ed-prop { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; flex-shrink: 0; min-height: 44px; justify-content: center; }
+/* Fixed widths, so a longer type or version never shifts the header; long values end in "…". */
+.ed-prop-type { width: 128px; }
+.ed-prop-version { width: 104px; }
+.ed-prop-yield { width: 116px; }
+.ed-prop-notes { width: 76px; }
+.ed-prop .ed-prop-v { max-width: 100%; }
+.ed-prop-v { font-size: 22px; line-height: 1; }
+.ed-timeline { display: flex; align-items: flex-start; margin-top: 6px; flex-shrink: 0; min-width: 0; }
+.ed-scroll { flex: 1 1 auto; min-width: 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; display: flex; flex-direction: column; gap: 14px; }
+.ed-scroll::-webkit-scrollbar { display: none; }
+/* A soft edge where more stages are hidden. */
+.ed-scroll.more-right { mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); }
+.ed-scroll.more-left { mask-image: linear-gradient(to right, transparent, #000 48px); }
+.ed-scroll.more-left.more-right { mask-image: linear-gradient(to right, transparent, #000 48px, #000 calc(100% - 48px), transparent); }
+.ed-chart { position: relative; flex-shrink: 0; }
+.ed-band { position: absolute; top: 0; bottom: 0; border-radius: 10px; background: var(--beige-soft); }
+.ed-chart svg { position: relative; }
+.ed-axis { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-shrink: 0; }
+.ed-axis[data-dragging='true'] { user-select: none; }
+.ed-axis li.dragging { position: relative; z-index: 2; }
+.ed-axis li.dragging button { background: var(--ground); border-radius: 12px; box-shadow: 0 10px 28px rgba(58, 42, 31, 0.18); }
+.ed-drop { position: absolute; top: 0; bottom: 0; width: 4px; border-radius: 2px; background: var(--brown); z-index: 1; }
+.ed-axis li { flex-shrink: 0; min-width: 0; padding-right: 6px; }
+.ed-axis button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; flex-direction: column; gap: 8px; min-height: 44px; }
+.ed-axis-line { height: 1px; background: #d9c8ae; }
+.ed-axis-name { font-size: 18px; line-height: 1.05; color: var(--taupe); }
+.ed-axis-meta { font-size: 10px; }
+.ed-axis li.selected .ed-axis-line { height: 3px; background: var(--brown); }
+.ed-axis li.selected .ed-axis-name { color: var(--ink); }
+.ed-panel { --ed-row: 52px; flex: 1 1 auto; min-height: 0; border-top: 1px solid var(--beige); padding-top: 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 40px; align-content: start; overflow-y: auto; }
+.ed-col { display: flex; flex-direction: column; min-width: 0; }
+.ed-col > .ed-group:last-child { flex: 1 1 auto; }
+/* A group: its name, then its options close together; a rule sets it apart from the next. */
+.ed-group { min-width: 0; display: flex; flex-direction: column; justify-content: flex-start; padding: 8px 0; } /* air inside every group, top and bottom */
+.ed-group + .ed-group { border-top: 1px solid var(--rule); }
+.ed-group > .ed-row { height: var(--ed-row); flex-shrink: 0; }
+.ed-group > .ed-seg-wrap { min-height: var(--ed-row); flex-shrink: 0; } /* a full-size toggle sets its own height */
+.ed-ruler { display: flex; flex-direction: column; justify-content: center; flex-shrink: 0; }
+.ed-ruler.off { opacity: 0.4; }
+.ed-row-end { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+/* Row labels stay on one line; if a value and OFF ever leave too little room, the label ends in "…". */
+.ed-row > .label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The stage's name under its heading: up to two lines, wrapping; the line height keeps tall letters whole. */
+.ed-name { all: unset; box-sizing: border-box; cursor: pointer; min-height: 44px; font-size: 24px; line-height: 1.25; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+/* A group's name: semibold brown, apart from both the ink values and the lighter taupe labels. */
+.ed-group-head { padding: 4px 0 2px; font-family: var(--mono); font-weight: 600; font-size: 10px; line-height: 13px; letter-spacing: 0.1em; color: var(--brown); }
+.ed-seg-wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ed-seg-wrap .ed-seg { width: 60%; flex-shrink: 0; }
+.ed-seg { display: flex; border: 1px solid var(--beige); border-radius: 25px; padding: 2px; }
+.ed-seg button { flex: 1; height: 44px; border: none; border-radius: 22px; background: transparent; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--taupe); cursor: pointer; }
+.ed-seg button[aria-pressed='true'] { background: var(--beige); color: var(--ink); }
+.ed-row { all: unset; position: relative; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; min-width: 0; }
+.ed-row-v { font-size: 24px; line-height: 1; flex-shrink: 0; }
+.ed-row.off .ed-row-v { color: var(--taupe); }
+/* Newsreader's ink sits 0.12 em above the middle of its line (measured); nudge it down so serif values centre in
+   their rows like the mono labels beside them. */
+.ed-row-v, .ed-target-v { position: relative; top: 0.12em; }
+.ed-row.off .ed-row-v { top: 0; } /* "--" has no tall ink: it centres without the nudge */
+.ed-target { cursor: default; }
+.ed-target-v { display: flex; align-items: baseline; gap: 8px; font-size: 24px; line-height: 1; } /* same as every row's value */
+.ed-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-shrink: 0; }
+.ed-problem { font-size: 17px; line-height: 1.3; color: var(--brown-ink); max-width: 360px; }
+.ed-save { height: 68px; }
+.ed-value-sheet { height: 380px; }
+.ed-value-big { display: flex; align-items: baseline; gap: 10px; font-size: 60px; line-height: 0.9; }
+.ed-text-sheet { height: auto; min-height: 280px; gap: 20px; justify-content: flex-start; }
+.ed-text-sheet .sheet-footer { margin-top: auto; }
+.ed-text-input { height: 64px; border: 1px solid var(--beige); border-radius: 18px; padding: 0 20px; font-family: var(--serif); font-size: 26px; color: var(--ink); background: var(--ground); user-select: text; }
+.ed-text-input:focus { outline: 2px solid var(--brown); outline-offset: -1px; }
+
+@media (max-height: 700px) {
+  .editor { gap: 8px; }
+  .ed-panel { --ed-row: 44px; column-gap: 28px; }
+  .ed-group { padding: 4px 0; }
+  .ed-group-head { padding: 2px 0; }
+  .ed-scroll { gap: 6px; } /* chart to stage strip */
+  /* Compact toggles: a 36 px pill with air around it; each button keeps a 44 px tap area (it reaches past the
+     drawn pill, which is the ::before). */
+  .ed-panel .ed-seg { height: 36px; padding: 0 2px; align-items: center; }
+  .ed-panel .ed-seg button { position: relative; isolation: isolate; height: 44px; margin: -5px 0; background: transparent; }
+  .ed-panel .ed-seg button::before { content: ''; position: absolute; inset: 6px 0; z-index: -1; border-radius: 16px; }
+  .ed-panel .ed-seg button[aria-pressed='true'] { background: transparent; }
+  .ed-panel .ed-seg button[aria-pressed='true']::before { background: var(--beige); }
+  /* The OFF button matches: a 36 px drawn pill on a 44 px tap area. */
+  .ed-panel .ed-row .chip { position: relative; isolation: isolate; border: none; background: transparent; }
+  .ed-panel .ed-row .chip::before { content: ''; position: absolute; inset: 4px 0; z-index: -1; border: 1px solid var(--beige); border-radius: 18px; }
+  .ed-target-v { font-size: 21px; }
+  .ed-name { font-size: 21px; }
+  .ed-header { gap: 8px; }
+  .ed-prop { padding: 0 6px; }
+  .ed-prop-type { width: 112px; }
+  .ed-prop-yield { width: 104px; }
+  .ed-prop-version { width: 88px; }
+  .ed-prop-notes { width: 64px; }
+  .ed-axis button { gap: 6px; }
+  .ed-row-v { font-size: 21px; }
+  .ed-title-name { font-size: 28px; }
+  .ed-save { height: 44px; } /* the same height as the other footer buttons */
+}

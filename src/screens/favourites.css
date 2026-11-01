@@ -1,0 +1,39 @@
+.favs { position: relative; width: 100%; height: 100%; padding: var(--page-pad); display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+.favs[data-dragging='true'] { cursor: grabbing; user-select: none; touch-action: none; }
+.favs-five { display: flex; flex-direction: column; gap: 10px; }
+.favs-slots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.fav-slot { height: 132px; border-radius: var(--radius-tile); padding: 16px; background: var(--beige-soft); border: 1px solid transparent; display: flex; flex-direction: column; justify-content: space-between; cursor: grab; touch-action: pan-y; min-width: 0; }
+.fav-slot.active { background: var(--ground); border-color: var(--ink); }
+.fav-slot.empty { background: transparent; border: 1.5px dashed #d9c8ae; cursor: default; }
+.fav-slot.target { background: var(--ground); border: 2px dashed var(--brown); }
+.fav-slot-top { display: flex; justify-content: space-between; }
+.fav-slot.target .fav-slot-top { color: var(--brown); }
+.fav-slot-name { font-size: 21px; line-height: 1.05; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; overflow-wrap: break-word; }
+.fav-slot.empty .fav-slot-name, .fav-slot.target .fav-slot-name { color: #9c8870; }
+.fav-slot-note { color: var(--brown); min-height: 14px; }
+.favs-lib-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 8px; }
+.favs-search { flex-grow: 0; width: 320px; }
+.favs-grid { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 132px; gap: 12px; align-content: start; overscroll-behavior: contain; }
+.fav-card { border-radius: var(--radius-tile); padding: 16px 18px; border: 1px solid var(--beige); background: var(--ground); display: flex; flex-direction: column; justify-content: space-between; cursor: grab; touch-action: pan-y; min-width: 0; overflow: hidden; }
+.fav-card.lifted { opacity: 0.35; }
+.fav-card-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fav-card-name { font-size: 19px; line-height: 1.1; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.fav-ghost { position: fixed; z-index: 70; width: 252px; height: 80px; border-radius: var(--radius-tile); padding: 14px 18px; border: 1px solid var(--ink); background: var(--ground); box-shadow: 0 22px 44px rgba(58, 42, 31, 0.18); transform: rotate(-2deg); display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+.favs-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-shrink: 0; }
+.fav-detail { position: absolute; left: max(16px, calc(50% - 420px)); top: max(16px, calc(50% - 360px)); width: min(840px, calc(100% - 32px)); max-height: min(720px, calc(100% - 32px)); border-radius: 28px; background: var(--ground); padding: 28px 30px; display: flex; flex-direction: column; gap: 18px; }
+.fav-detail-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+@media (max-height: 700px) {
+  .favs { gap: 12px; }
+  .fav-slot { height: 100px; padding: 12px 14px; }
+  .fav-slot-name { font-size: 18px; -webkit-line-clamp: 2; }
+  .favs-grid { grid-auto-rows: 112px; }
+  .fav-card { padding: 12px 14px; }
+  .fav-card-name { font-size: 17px; }
+  .fav-detail { padding: 20px 24px; gap: 12px; }
+}
+/* The pop-up's own frame around the shared detail content: close button top right, slots and buttons below. */
+.fav-detail { padding-right: 0; }
+.fav-detail-close { position: absolute; top: 20px; right: 20px; z-index: 1; }
+.fav-detail .lib-detail-head { padding-right: 56px; }
+.fav-detail-actions { padding-right: 30px; }

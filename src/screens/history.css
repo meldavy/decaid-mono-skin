@@ -1,0 +1,19 @@
+/* History builds on the library's list + detail layout. */
+.hist-list { gap: 2px; }
+.hist-day { display: flex; flex-direction: column; gap: 2px; }
+.hist-day-label { padding: 12px 16px 4px; }
+.hist-row { height: 72px; }
+.hist-mini { width: 90px; flex-shrink: 0; display: flex; align-items: center; }
+.hist-row-meta { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+.hist-result { font-family: var(--dots); font-weight: 700; font-size: var(--dots-xs); line-height: 1; white-space: nowrap; }
+.hist-rate { display: flex; gap: 4px; flex-shrink: 0; }
+.hist-rate span { border-radius: 50%; }
+.hist-more { padding: 16px; min-height: 24px; text-align: center; }
+.hist-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.hist-sub { font-size: 17px; font-style: italic; color: #5b4f45; overflow-wrap: anywhere; }
+.hist-rating { display: flex; flex-direction: column; gap: 2px; padding-top: 14px; border-top: 1px solid var(--rule); margin-bottom: -10px; }
+.hist-pips { display: flex; margin-left: -15px; }
+.hist-note { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.hist-note-text { font-size: 20px; line-height: 1.35; overflow-wrap: anywhere; white-space: pre-line; }
+.hist-note-text.empty { color: var(--taupe); }
+.hist-detail-empty { border-style: dashed; }

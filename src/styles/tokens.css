@@ -1,0 +1,163 @@
+/* Mono design tokens. The rules that use them are in docs/STYLE.md. */
+:root {
+  --ground: #ffffff;
+  --ink: #171412;          /* type */
+  --taupe: #857160;        /* labels */
+  --brown: #7a5636;        /* actionable / primary */
+  --brown-ink: #4a3322;    /* text on quiet buttons */
+  --beige: #efe6d7;        /* selected, quiet borders */
+  --beige-soft: #f6f1e9;   /* quiet surfaces */
+  --rule: #f1ebe1;
+  --display: #3a2a1f;      /* the brown display: live data only */
+  --display-cream: #ede3d2;/* type on the display */
+  --display-label: #c9b08c;
+  --display-soft: #e2d6c3;
+  --sleep: #2e2119;
+  --rust-on-display: #e0784a; /* rust, lightened to read on the dark display: waiting states (heating) */
+  --accent: #c98b2b;       /* flow / charts; Settings → Mono → chart accent */
+  --scrim: rgba(46, 33, 25, 0.42);
+
+  --dots: 'Doto', monospace;
+  --serif: 'Newsreader', Georgia, serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --pitch: 9px;            /* the one dot pitch of the display grid */
+
+  /* Dot-matrix type scale. Doto's dots are 1/10 of the font size apart, so these sizes put the font's dots
+     at the display grid's 9 px pitch (90 px) or an even fraction of it (½, ⅓, ⅕). Every Doto size comes from here. */
+  --dots-xs: 18px;         /* 1.8 px dots, 5 per grid step: status lines (READY, EXTRACTING). Never for sentences */
+  --dots-s: 30px;          /* 3 px dots, 3 per step: readouts (steam / scale / tank, pressure / flow / group, peak / avg) */
+  --dots-m: 45px;          /* 4.5 px dots, 2 per step: running-modal title and readings */
+  --dots-xl: 90px;         /* 9 px dots, the grid's own pitch: hero numbers (group temperature, shot time and weight) */
+
+  /* Layout — every full screen uses these, so shared elements land in the same place on every page. */
+  --page-pad: 32px;        /* screen edge → content, all four sides */
+  --gap-major: 40px;       /* between the display and the main column */
+  --gap-block: 16px;       /* between stacked blocks inside a column */
+  --radius-display: 26px;
+  --radius-card: 22px;
+  --radius-tile: 20px;
+  --tile-w: 96px;          /* quiet action tile: Steam / Water / Flush / Next */
+  --tile-h: 112px;
+  --primary-w: 200px;      /* primary action tile, bottom-right: Brew / Stop / Done */
+  --tile-gap: 12px;
+  --icon-hit: 48px;        /* icon buttons in the header cluster */
+  --dot-grid: radial-gradient(rgba(237, 227, 210, 0.09) 1.2px, transparent 1.6px);
+}
+
+/* Short screens (e.g. a 1000 × 600 tablet): tighter padding and lower tiles everywhere. Same breakpoint as useShort(). */
+@media (max-height: 700px) {
+  :root { --page-pad: 20px; --tile-h: 96px; --gap-major: 28px; }
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  height: 100vh;           /* Chrome 91: no dvh */
+  overflow: hidden;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-weight: 400;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+button { font: inherit; color: inherit; }
+
+.label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+.display {
+  background-color: var(--display);
+  background-image: var(--dot-grid);
+  background-size: var(--pitch) var(--pitch);
+  color: var(--display-cream);
+}
+
+.display .label { color: var(--display-label); }
+
+.dots {
+  font-family: var(--dots);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 26px;
+  background: var(--ground);
+  border: 1px solid var(--beige);
+  box-shadow: 0 8px 24px rgba(46, 33, 25, 0.12);
+  font-family: var(--serif);
+  font-size: 18px;
+}
+.toast[data-tone='error'] { background: var(--display); color: var(--display-cream); border-color: var(--display); }
+.toast-action { border: none; background: transparent; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; color: var(--brown); cursor: pointer; min-height: 44px; }
+
+
+.one-line { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* A dot drawing on the display brings its own patch of display grid, starting at its own corner, so its
+   dots (centred at 4.5 + 9k) sit exactly on the grid: one dot pitch on the whole surface. */
+.grid-patch {
+  background-color: var(--display);
+  background-image: var(--dot-grid);
+  background-size: var(--pitch) var(--pitch);
+}
+
+/* Shared action tiles: identical on every screen. */
+.tile { width: var(--tile-w); height: var(--tile-h); border: 1px solid var(--beige); border-radius: var(--radius-tile); background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--brown-ink); }
+.primary { width: var(--primary-w); height: var(--tile-h); border: none; border-radius: var(--radius-tile); background: var(--brown); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; color: #fff; font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; }
+.tile:disabled, .primary:disabled { opacity: 0.4; cursor: default; }
+.tile-row { display: flex; gap: var(--tile-gap); }
+.icon-button { width: var(--icon-hit); height: var(--icon-hit); border: none; border-radius: calc(var(--icon-hit) / 2); background: transparent; display: flex; flex-shrink: 0; align-items: center; justify-content: center; cursor: pointer; color: var(--brown); }
+.icon-button:disabled { opacity: 0.4; cursor: default; }
+
+/* Questions to the person: white cards. */
+.confirm-layer { position: fixed; inset: 0; z-index: 55; }
+.confirm { position: absolute; left: calc(50% - 280px); top: calc(50% - 170px); width: 560px; border-radius: 28px; background: var(--ground); padding: 32px 34px 30px; display: flex; flex-direction: column; gap: 18px; }
+.confirm-title { font-size: 36px; line-height: 1.05; letter-spacing: -0.02em; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.confirm-body { font-size: 19px; line-height: 1.45; color: #5b4f45; }
+.confirm-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; }
+.quiet-button { height: 64px; padding: 0 24px; border: 1px solid var(--beige); border-radius: var(--radius-tile); background: transparent; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--brown-ink); cursor: pointer; }
+.primary.hold { width: auto; height: 64px; padding: 0 26px; gap: 8px; font-size: 13px; }
+
+/* Overlays contrast with what's behind them: white cards get the dark scrim; brown machine messages get a pale one
+   that washes the screen out, so the message is the only brown surface. */
+.scrim.light { background: rgba(255, 255, 255, 0.84); }
+.confirm.unsaved { width: 600px; left: calc(50% - 300px); }
+.unsaved-list { display: flex; flex-direction: column; }
+.unsaved-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 10px 0; border-top: 1px solid var(--rule); font-size: 20px; min-width: 0; }
+.unsaved-row:last-child { border-bottom: 1px solid var(--rule); }
+.unsaved-change { display: flex; gap: 10px; align-items: baseline; flex-shrink: 1; min-width: 0; max-width: 60%; }
+
+/* Connection banner: a dark pill heading the toast stack, top centre. */
+.conn-banner { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 22px; box-shadow: 0 8px 24px rgba(46, 33, 25, 0.12); background: var(--display); color: var(--display-cream); font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; pointer-events: none; }
+.conn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--display-label); animation: conn-blink 1s steps(2, start) infinite; }
+@keyframes conn-blink { to { visibility: hidden; } }
+/* Group-head-controller machines: the Brew tile becomes a quiet note. */
+
+/* A choice's mark: a ring that fills when chosen (Settings lists, dropdowns). */
+.radio-mark { width: 24px; height: 24px; flex-shrink: 0; border: 1.5px solid var(--beige); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+[aria-checked='true'] > .radio-mark, [aria-selected='true'] > .radio-mark { border-color: var(--accent); }
+[aria-checked='true'] > .radio-mark::after, [aria-selected='true'] > .radio-mark::after { content: ''; width: 12px; height: 12px; border-radius: 6px; background: var(--accent); }
+
+/* Dropdown: a short list under its button. */
+.dropdown { position: relative; flex-shrink: 0; }
+.dropdown-catcher { position: fixed; inset: 0; z-index: 40; }
+.dropdown-list { position: absolute; top: calc(100% + 6px); left: 0; z-index: 41; min-width: 200px; padding: 6px 14px; background: var(--ground); border: 1px solid var(--beige); border-radius: 18px; box-shadow: 0 12px 32px rgba(46, 33, 25, 0.14); display: flex; flex-direction: column; }
+.dropdown-option { all: unset; box-sizing: border-box; cursor: pointer; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 19px; color: var(--ink); border-top: 1px solid var(--rule); }
+.dropdown-option:first-child { border-top: none; }

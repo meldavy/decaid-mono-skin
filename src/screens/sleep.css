@@ -1,0 +1,12 @@
+.sleep { position: fixed; inset: 0; z-index: 60; background: var(--sleep); color: var(--display-cream); overflow: hidden; touch-action: none; cursor: default; transition: background 0.6s ease; }
+.sleep-field { position: absolute; inset: 0; display: block; transition: opacity 0.6s ease; }
+.sleep-label { position: absolute; left: 0; right: 0; text-align: center; font-size: var(--dots-xs); letter-spacing: 0.1em; color: var(--display-label); }
+.sleep-date { position: absolute; left: 0; right: 0; text-align: center; font-size: 14px; letter-spacing: 0.14em; color: var(--display-label); }
+.sleep-foot { position: absolute; left: 36px; right: 36px; bottom: 27px; display: flex; justify-content: space-between; align-items: flex-end; gap: 36px; letter-spacing: 0.08em; color: var(--display-label); }
+.sleep-last { display: flex; flex-direction: column; gap: 6px; min-width: 0; max-width: 50%; }
+.sleep-last-title { font-family: var(--serif); font-size: 22px; letter-spacing: 0; text-transform: none; color: var(--display-cream); }
+.sleep-wake { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.sleep-hold { color: var(--display-cream); min-height: 14px; display: flex; align-items: center; }
+/* Dark: nothing on screen until a tap. */
+.sleep.dark { background: #000; }
+.sleep.dark > * { opacity: 0; }

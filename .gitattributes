@@ -1,0 +1,4 @@
+# LF everywhere: the shell scripts fail with CRLF line endings.
+* text=auto eol=lf
+*.png binary
+*.woff2 binary

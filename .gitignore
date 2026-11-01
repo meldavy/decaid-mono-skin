@@ -1,0 +1,9 @@
+node_modules/
+/dist/
+*.zip
+/test-results/
+/playwright-report/
+/screens/
+.vite/
+*.log
+.DS_Store

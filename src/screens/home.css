@@ -1,0 +1,78 @@
+.home { width: 100%; height: 100%; padding: var(--page-pad); display: flex; gap: var(--gap-major); }
+
+.home-display { position: relative; width: 360px; flex-shrink: 0; border-radius: var(--radius-display); padding: 27px; display: flex; flex-direction: column; justify-content: space-between; }
+.home-display .headline { display: flex; justify-content: space-between; font-size: var(--dots-xs); letter-spacing: 0.08em; }
+.home-display .thermal { display: flex; align-items: center; gap: 10px; }
+.home-display .thermal.heating { color: var(--rust-on-display); }
+.home-display .hero { font-size: var(--dots-xl); line-height: 0.85; letter-spacing: -0.02em; }
+.home-display .rows { display: flex; flex-direction: column; }
+.home-display .row { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-top: 1px solid rgba(237, 227, 210, 0.16); }
+.home-display .row:last-child { border-bottom: 1px solid rgba(237, 227, 210, 0.16); }
+.home-display .row .dots { font-size: var(--dots-s); line-height: 1; }
+.home-display .row-with-button { padding: 0; }
+/* The whole row is the tare target: the row's padding moves into the button. */
+.home-display .row-button { all: unset; cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; width: 100%; padding: 12px 0; }
+.home-display .row-button:disabled { cursor: default; }
+
+.home-main { flex-grow: 1; min-width: 0; padding-left: 4px; margin-left: -4px; /* room for serif overhang */ display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+.home-header { height: 48px; display: flex; align-items: center; justify-content: space-between; }
+/* Icon with its label underneath, tighter than the action tiles: the whole button still fits the 48 px header. */
+.home-nav { display: flex; gap: 4px; }
+.nav-button { all: unset; box-sizing: border-box; cursor: pointer; min-width: 72px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: var(--brown); border-radius: 14px; }
+.nav-button .label { font-size: 10px; line-height: 1; color: var(--brown-ink); }
+.nav-button:disabled { opacity: 0.4; cursor: default; }
+.pill { height: 48px; padding: 0 20px 0 16px; border: 1px solid var(--beige); border-radius: 24px; background: transparent; display: flex; align-items: center; gap: 12px; cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--brown-ink); }
+.pill:disabled { opacity: 0.4; cursor: default; }
+
+.carousel { height: 340px; position: relative; overflow: hidden; touch-action: pan-y; }
+.carousel-track { position: absolute; top: 0; bottom: 0; left: 50%; display: flex; align-items: center; gap: 20px; transition: transform 0.28s ease; will-change: transform; } /* its own layer: moving it never repaints the cards */
+.card-side { width: 280px; height: 280px; flex-shrink: 0; border: none; border-radius: var(--radius-card); background: var(--beige-soft); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; cursor: pointer; text-align: left; }
+.card-side .name { font-size: 26px; line-height: 1.05; color: #5b4f45; }
+.card-side.before .name, .card-side.before .label { align-self: flex-end; text-align: right; } /* left of the main card: its right edge is the part that shows */
+/* A slot holds both forms of a card, each on its own layer; the slot's width is the shown form's. A swap flips
+   opacity and moves layers, so it's composited, never repainted. */
+.card-slot { position: relative; width: 280px; height: 100%; flex-shrink: 0; }
+.card-slot.is-main { width: 480px; }
+.card-slot > * { position: absolute; left: 0; top: 50%; margin-top: -140px; will-change: transform, opacity; }
+.card-slot > .card-main { margin-top: -170px; }
+.card-slot.is-main > .card-side, .card-slot:not(.is-main) > .card-main { opacity: 0; pointer-events: none; }
+.card-side.empty { background: transparent; border: 1px dashed var(--beige); cursor: default; }
+.card-main { width: 480px; height: 340px; flex-shrink: 0; border: 1px solid #e6dccc; border-radius: 26px; padding: 20px 28px; display: flex; flex-direction: column; justify-content: space-between; background: var(--ground); text-align: left; }
+/* A card pulled into the middle grows into place. */
+.card-slot.grow.is-main > .card-main { animation: card-grow 0.22s ease-out; }
+@keyframes card-grow { from { transform: scale(0.9); opacity: 0.5; } }
+.card-main .title { font-size: 44px; line-height: 1; letter-spacing: -0.02em; }
+.card-main .provenance { font-size: 18px; font-style: italic; color: #5b4f45; }
+.pager { display: flex; justify-content: center; gap: 12px; } /* 6 px dots, 18 px apart */
+.pager span { width: 6px; height: 6px; border-radius: 50%; background: #d9c8ae; }
+.pager span[aria-current='true'] { background: var(--ink); }
+
+.values { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.value { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-height: 44px; }
+.value .v { font-size: 36px; line-height: 1; }
+.value:disabled { cursor: default; opacity: 0.5; }
+
+.actions { display: flex; justify-content: space-between; align-items: stretch; }
+.card-chart { display: flex; flex-direction: column; gap: 10px; }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+.legend-item { display: flex; align-items: center; gap: 7px; white-space: nowrap; min-width: 0; }
+.legend-name { flex: 1 1 auto; }
+.legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+.legend-name { color: var(--ink); text-transform: none; letter-spacing: 0.02em; }
+.mini-plan { position: absolute; left: 27px; right: 27px; }
+.mini-plan-title { height: 34px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-align: right; line-height: 1.35; overflow-wrap: anywhere; }
+
+@media (max-height: 700px) {
+  .carousel, .card-main { height: 300px; }
+  /* A narrower display (still on the 9 px grid) and tighter carousel, so the side cards show a few characters. */
+  .home-display { width: 306px; padding: 18px; }
+  .mini-plan { left: 18px; right: 18px; }
+  .carousel-track { gap: 14px; }
+  .card-side { padding: 14px; }
+  .card-main { padding: 16px 24px; }
+  .card-main .title { font-size: 38px; }
+  .card-side { height: 250px; }
+  .card-slot > * { margin-top: -125px; }
+  .card-slot > .card-main { margin-top: -150px; }
+  .value .v { font-size: 30px; }
+}

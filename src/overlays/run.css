@@ -1,0 +1,13 @@
+.run-layer { position: fixed; inset: 0; z-index: 35; }
+.run { position: absolute; left: calc(50% - 360px); top: calc(50% - 252px); width: 720px; height: 504px; border-radius: 28px; }
+.run-head { position: absolute; left: 36px; top: 36px; right: 36px; display: flex; justify-content: space-between; align-items: flex-start; }
+.run-title { font-size: var(--dots-m); line-height: 0.95; }
+.run-readings { position: absolute; left: 36px; top: 162px; right: 36px; display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 24px; }
+.run-reading { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid rgba(237, 227, 210, 0.16); }
+.run-value { font-size: var(--dots-m); line-height: 0.9; }
+.run-target { font-size: 19px; line-height: 1.2; color: var(--display-soft); min-height: 23px; }
+.run-progress { position: absolute; left: 36px; top: 342px; display: block; }
+.run-caption { position: absolute; left: 36px; top: 372px; }
+.run-foot { position: absolute; left: 36px; right: 36px; bottom: 36px; display: flex; justify-content: space-between; align-items: center; }
+.run-stop { height: 64px; padding: 0 30px 0 24px; border: none; border-radius: 20px; background: var(--display-cream); display: flex; align-items: center; gap: 14px; cursor: pointer; color: var(--display); font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; }
+.run-stop:disabled { opacity: 0.6; }
