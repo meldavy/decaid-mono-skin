@@ -10,8 +10,8 @@ import { errorToast } from '../ui/toasts'
 import { useSize } from '../ui/useSize'
 import './sleep.css'
 
-// S4b. Shown only while the machine reports `sleeping`. The screen goes dark after a while; a tap brings the
-// clock back without waking the machine; holding anywhere wakes it.
+// Shown only while the machine reports `sleeping`. The backlight dims to the sleep brightness, and goes dark after
+// a while; a tap brings the clock back without waking the machine; holding anywhere wakes it.
 
 const FIELD_PITCH = 18 // two 9 px grid cells: the field's dots sit on the grid
 const HOLD_MS = 800
@@ -40,7 +40,7 @@ export function Sleep() {
   const holdFrame = useRef<number>(0)
   const brightnessBefore = useRef<number | null>(null)
 
-  // Dark after `screenOffAfter` seconds (0 = never). Brightness goes to 0 where the platform supports it.
+  // Dark after `screenOffAfter` seconds (0 = never).
   const armDark = () => {
     clearTimeout(darkTimer.current)
     if (prefs.screenOffAfter > 0) darkTimer.current = setTimeout(() => setDark(true), prefs.screenOffAfter * 1000)
@@ -53,20 +53,18 @@ export function Sleep() {
       try {
         const display = await api.get<DisplayState>('/api/v1/display')
         if (cancelled || !display.platformSupported?.brightness) return
-        if (dark) {
-          brightnessBefore.current ??= display.requestedBrightness
-          await api.put('/api/v1/display/brightness', { brightness: 0 })
-        } else if (brightnessBefore.current !== null) {
-          await api.put('/api/v1/display/brightness', { brightness: brightnessBefore.current })
-          brightnessBefore.current = null
-        }
+        // The backlight, where the platform lets us: the sleep brightness (never brighter than the person's own),
+        // or 0 once dark. Their brightness is remembered on the way in and put back on the way out.
+        brightnessBefore.current ??= display.requestedBrightness
+        const level = dark ? 0 : Math.min(prefs.sleepBrightness, brightnessBefore.current)
+        if (level !== display.requestedBrightness) await api.put('/api/v1/display/brightness', { brightness: level })
       } catch {
         // Brightness is a nicety; the screen still goes dark visually.
       }
     }
     void apply()
     return () => { cancelled = true }
-  }, [dark])
+  }, [dark, prefs.sleepBrightness])
   // Leaving the sleep screen (machine woke) always restores brightness.
   useEffect(() => () => {
     if (brightnessBefore.current !== null) void api.put('/api/v1/display/brightness', { brightness: brightnessBefore.current }).catch(() => undefined)

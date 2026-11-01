@@ -66,13 +66,22 @@ test.describe('Sleep', () => {
     await expect(page.getByTestId('wakes-at')).toHaveText('WAKES AT 6:30')
   })
 
-  test('SLEEP-03 the screen goes dark after the set time and brightness goes to 0', async ({ page }) => {
+  test('SLEEP-03 the screen dims to the sleep brightness, then goes dark after the set time', async ({ page }) => {
     await setPrefs({ screenOffAfter: 2 })
     const set = await fakeBrightness(page)
     await asleep(page)
     await expect(sleep(page)).toHaveAttribute('data-dark', 'false')
+    await expect.poll(() => set).toEqual([10]) // the default sleep brightness
     await expect(sleep(page)).toHaveAttribute('data-dark', 'true', { timeout: 5_000 })
-    await expect.poll(() => set).toEqual([0])
+    await expect.poll(() => set).toEqual([10, 0])
+  })
+
+  test('SLEEP-10 the sleep brightness is a setting, and never brighter than the person\'s own', async ({ page }) => {
+    await setPrefs({ screenOffAfter: 0, sleepBrightness: 90 })
+    const set = await fakeBrightness(page) // their brightness is 70
+    await asleep(page)
+    await page.waitForTimeout(800)
+    expect(set).toEqual([]) // 90 would brighten it: left at 70
   })
 
   test('SLEEP-04 a tap while dark brings the clock back without waking the machine', async ({ page }) => {
@@ -110,10 +119,10 @@ test.describe('Sleep', () => {
     await setPrefs({ screenOffAfter: 1 })
     const set = await fakeBrightness(page)
     await asleep(page)
-    await expect.poll(() => set).toEqual([0])
+    await expect.poll(() => set).toEqual([10, 0])
     await decaid('PUT', '/api/v1/machine/state/idle')
     await expect(sleep(page)).toBeHidden()
-    await expect.poll(() => set).toEqual([0, 70])
+    await expect.poll(() => set).toEqual([10, 0, 70])
   })
 
   test('GLB-26 a long last-shot profile name stays on one line on the sleep screen', async ({ page }) => {

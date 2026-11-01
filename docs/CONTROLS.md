@@ -211,13 +211,14 @@ Apply every line to every control while writing its scenarios; anything that app
 |---|---|---|
 | SLEEP-01 | Shown only while the machine reports `sleeping` | S |
 | SLEEP-02 | Dot-matrix clock, "SLEEPING", date; 12 / 24 h | S |
-| SLEEP-03 | Screen goes dark after the configured time; brightness set via Decaid display API | S |
+| SLEEP-03 | Backlight dims to the sleep brightness (default 10 %); goes dark (0) after the configured time; brightness set via Decaid display API | S |
 | SLEEP-04 | Tap while dark → clock shows again; does not wake the machine | S |
 | SLEEP-05 | Hold → machine wakes (idle), back to Home | S |
 | SLEEP-06 | Hold released early → still asleep | S |
 | SLEEP-07 | Woken from outside (machine button, schedule) → Home | S |
 | SLEEP-08 | Normal brightness restored on wake and after reconnect | S |
 | SLEEP-09 | Brightness on a real tablet | M |
+| SLEEP-10 | Sleep brightness setting; never raises the backlight above the person's own brightness | S |
 
 ## LIB — profile library (A2)
 

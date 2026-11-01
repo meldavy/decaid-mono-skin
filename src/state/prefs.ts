@@ -16,6 +16,7 @@ export interface Prefs {
   clock: '24' | '12'
   language: string
   completionSound: boolean
+  sleepBrightness: number // backlight % on the sleep screen (Streamline's screen saver dims to 10)
   screenOffAfter: number // seconds on the sleep screen before going dark; 0 = never
   wakeProfile: string // profile id loaded when the machine wakes; '' = leave it
 }
@@ -26,6 +27,7 @@ export const DEFAULT_PREFS: Prefs = {
   clock: '24',
   language: 'en',
   completionSound: false,
+  sleepBrightness: 10,
   screenOffAfter: 60,
   wakeProfile: '',
 }
