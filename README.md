@@ -1,6 +1,23 @@
 # Mono
 
-A Decaid skin: white ground, a brown dot-matrix display for live data, serif for people, dots for the machine.
+It's an incredibly form-over-function skin, fully opinionated to my own tastes.
+
+* The inspiration comes from the Zuriga T2 and Nothing OS.
+* Quality-of-life features such as hold-to-wake and chime on complete comes directly from the Bestpresso skin.
+
+Some screenshots, captured on simulator/browser, roughly matching the same layout of my tablet's screen (Samsung A11). 
+
+<img width="997" height="596" alt="image" src="https://github.com/user-attachments/assets/2810a688-526b-4638-bf1d-16082cab120a" />
+
+<img width="1036" height="635" alt="image" src="https://github.com/user-attachments/assets/18ef0465-b50e-4bfa-a835-72da945ca514" />
+
+<img width="1037" height="636" alt="image" src="https://github.com/user-attachments/assets/a8c6a462-40fa-46be-83dd-0e261a126ae6" />
+
+<img width="997" height="595" alt="image" src="https://github.com/user-attachments/assets/fe031591-7a8e-47fe-aedd-15df770c30fa" />
+
+
+## Development
+
 Visual rules: [`docs/STYLE.md`](docs/STYLE.md). Scenarios: [`docs/CONTROLS.md`](docs/CONTROLS.md).
 
 ```sh
