@@ -1,41 +1,43 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { enjoymentToStars, getShot, starsToEnjoyment, updateShot } from '../state/shots'
 import { DotIcon } from '../ui/DotIcon'
+import { CoffeeSheet, type CoffeeChoice } from '../sheets/CoffeeSheet'
+import { coffeeContext, grinderContext } from '../state/coffee'
 import { toast } from '../ui/toasts'
 import '../sheets/sheet.css'
 
 export const NOTE_LIMIT = 2_000
 
-// Notes, and the optional coffee, roaster and grind, for one shot; with `rating`, its rating too. Saves only what
-// changed. onClose gets the result after a save, nothing when cancelled.
+// Notes, and the optional coffee, grinder and grind, for one shot; with `rating`, its rating too. Saves only what
+// changed. onClose gets the result after a save, nothing when cancelled. Coffee and grinder are picked from Beans
+// (the same picker as Home's); a coffee typed on an older shot stays until another is picked.
 export function NotesSheet({ shotId, rating = false, onClose }: { shotId: string; rating?: boolean; onClose: (result?: { hasNote: boolean; stars: number }) => void }) {
-  const [loaded, setLoaded] = useState<{ notes: string; grind: string; coffee: string; roaster: string; stars: number } | null>(null)
+  const [loaded, setLoaded] = useState<{ notes: string; grind: string; coffee: string; roaster: string; bagId: string; grinderId: string; grinderModel: string; stars: number } | null>(null)
+  const [picked, setPicked] = useState<CoffeeChoice | null>(null) // null: unchanged
+  const [picking, setPicking] = useState(false)
   const [stars, setStars] = useState(0)
   const [notes, setNotes] = useState('')
   const [grind, setGrind] = useState('')
-  const [coffee, setCoffee] = useState('')
-  const [roaster, setRoaster] = useState('')
   const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle')
   const saving = useRef(false)
 
   useEffect(() => {
     getShot(shotId).then((s) => {
       const c = s.workflow?.context
-      const initial = { notes: s.annotations?.espressoNotes ?? '', grind: String(c?.grinderSetting ?? ''), coffee: String(c?.coffeeName ?? ''), roaster: String(c?.coffeeRoaster ?? ''), stars: enjoymentToStars(s.annotations?.enjoyment) }
+      const str = (v: unknown) => (typeof v === 'string' ? v : '')
+      const initial = { notes: s.annotations?.espressoNotes ?? '', grind: String(c?.grinderSetting ?? ''), coffee: str(c?.coffeeName), roaster: str(c?.coffeeRoaster), bagId: str(c?.beanBatchId), grinderId: str(c?.grinderId), grinderModel: str(c?.grinderModel), stars: enjoymentToStars(s.annotations?.enjoyment) }
       setLoaded(initial)
       setStars(initial.stars)
       setNotes(initial.notes)
       setGrind(initial.grind)
-      setCoffee(initial.coffee)
-      setRoaster(initial.roaster)
-    }, () => setLoaded({ notes: '', grind: '', coffee: '', roaster: '', stars: 0 }))
+    }, () => setLoaded({ notes: '', grind: '', coffee: '', roaster: '', bagId: '', grinderId: '', grinderModel: '', stars: 0 }))
   }, [shotId])
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !picking && onClose()
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [onClose, picking])
 
   const save = async () => {
     if (saving.current || !loaded) return
@@ -44,8 +46,7 @@ export function NotesSheet({ shotId, rating = false, onClose }: { shotId: string
     if (rating && stars !== loaded.stars) patch.annotations = { ...patch.annotations, enjoyment: starsToEnjoyment(stars) }
     const context: Record<string, string | null> = {}
     if (grind.trim() !== loaded.grind) context.grinderSetting = grind.trim() || null
-    if (coffee.trim() !== loaded.coffee) context.coffeeName = coffee.trim() || null
-    if (roaster.trim() !== loaded.roaster) context.coffeeRoaster = roaster.trim() || null
+    if (picked) Object.assign(context, coffeeContext(picked.bean, picked.bag), grinderContext(picked.grinder))
     if (Object.keys(context).length) patch.workflow = { context }
     if (!patch.annotations && !patch.workflow) return onClose()
     saving.current = true
@@ -60,6 +61,10 @@ export function NotesSheet({ shotId, rating = false, onClose }: { shotId: string
       saving.current = false
     }
   }
+
+  const coffeeLine = picked
+    ? [[picked.bean?.roaster, picked.bean?.name].filter(Boolean).join(', '), picked.grinder?.model].filter(Boolean).join(' · ')
+    : loaded ? [[loaded.roaster, loaded.coffee].filter(Boolean).join(', '), loaded.grinderModel].filter(Boolean).join(' · ') : ''
 
   const swipe = useRef<{ y: number; id: number } | null>(null)
   const onHandleDown = (e: PointerEvent<HTMLDivElement>) => { swipe.current = { y: e.clientY, id: e.pointerId }; e.currentTarget.setPointerCapture?.(e.pointerId) }
@@ -87,14 +92,12 @@ export function NotesSheet({ shotId, rating = false, onClose }: { shotId: string
           <span className="label notes-count">{notes.length} / {NOTE_LIMIT}</span>
         </label>
         <div className="notes-row">
-          <label className="notes-grind notes-wide">
-            <span className="label">ROASTER · OPTIONAL</span>
-            <input value={roaster} maxLength={60} disabled={!loaded} onChange={(e) => setRoaster(e.target.value)} placeholder="e.g. The Big Roasters" data-testid="roaster-input" />
-          </label>
-          <label className="notes-grind notes-wide">
-            <span className="label">COFFEE · OPTIONAL</span>
-            <input value={coffee} maxLength={60} disabled={!loaded} onChange={(e) => setCoffee(e.target.value)} placeholder="e.g. Brasilia" data-testid="coffee-input" />
-          </label>
+          <div className="notes-grind notes-wide">
+            <span className="label">COFFEE · GRINDER</span>
+            <button type="button" className="notes-pick" disabled={!loaded} onClick={() => setPicking(true)} data-testid="coffee-pick">
+              <span className={coffeeLine ? 'one-line' : 'one-line empty'}>{coffeeLine || 'Choose from your beans'}</span>
+            </button>
+          </div>
           <label className="notes-grind">
             <span className="label">GRIND · OPTIONAL</span>
             <input value={grind} maxLength={24} disabled={!loaded} onChange={(e) => setGrind(e.target.value)} placeholder="e.g. 2.5" data-testid="grind-input" />
@@ -110,6 +113,12 @@ export function NotesSheet({ shotId, rating = false, onClose }: { shotId: string
           </div>
         </div>
       </section>
+      {picking && loaded && (
+        <CoffeeSheet title="Coffee and grinder for this shot"
+          initial={picked ? { bagId: picked.bag?.id, coffee: picked.bean?.name, roaster: picked.bean?.roaster, grinderId: picked.grinder?.id } : { bagId: loaded.bagId, coffee: loaded.coffee, roaster: loaded.roaster, grinderId: loaded.grinderId }}
+          onCancel={() => setPicking(false)}
+          onDone={(c) => { setPicking(false); setPicked(c) }} />
+      )}
     </div>
   )
 }

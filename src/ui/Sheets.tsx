@@ -54,7 +54,7 @@ export function ValueSheet({ title, spec, value, choice, onCancel, onDone }: { t
 }
 
 // `secret`: what's typed is hidden (passwords). `numeric`: the number keyboard.
-export function TextSheet({ label, value, multiline, onCancel, onDone, maxLength, secret = false, numeric = false }: { label: string; value: string; multiline: boolean; onCancel: () => void; onDone: (v: string) => void; maxLength?: number; secret?: boolean; numeric?: boolean }) {
+export function TextSheet({ label, value, multiline, onCancel, onDone, maxLength, secret = false, numeric = false, note }: { label: string; value: string; multiline: boolean; onCancel: () => void; onDone: (v: string) => void; maxLength?: number; secret?: boolean; numeric?: boolean; note?: string }) {
   const [v, setV] = useState(value)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCancel()
@@ -72,6 +72,7 @@ export function TextSheet({ label, value, multiline, onCancel, onDone, maxLength
             ? <textarea value={v} maxLength={4000} onChange={(e) => setV(e.target.value)} data-testid="text-input" autoFocus />
             : <input className="ed-text-input" type={secret ? 'password' : 'text'} autoComplete={secret ? 'off' : undefined} inputMode={numeric ? 'decimal' : undefined} value={v} maxLength={maxLength ?? 80} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onDone(v.trim())} data-testid="text-input" autoFocus />}
         </label>
+        {note && <span className="sheet-note" data-testid="text-sheet-note">{note}</span>}
         <div className="sheet-footer">
           <span className="label">{multiline ? `${v.length} / 4000` : `${v.length} / ${maxLength ?? 80}`}</span>
           <div style={{ display: 'flex', gap: 10 }}>

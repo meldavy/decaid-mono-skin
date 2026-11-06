@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { prefsResource, withDefaults } from './prefs'
-import { loadProfile, profiles } from './profiles'
+import { profiles } from './profiles'
+import { loadProfileBack } from './recipes'
 import { workflow } from './workflow'
 
 // Settings → Sleep & display → "Load a profile on wake". Only on the change from sleeping to awake that Mono sees
@@ -13,6 +14,6 @@ export function useWakeProfile(machineState: string | undefined) {
     if (was !== 'sleeping' || !machineState || machineState === 'sleeping') return
     const id = withDefaults(prefsResource.get().value).wakeProfile
     const record = id ? profiles.get().value?.find((p) => p.id === id) : undefined
-    if (record && workflow.get().value?.profile.title !== record.profile.title) void loadProfile(record, workflow.get().value).catch(() => undefined)
+    if (record && workflow.get().value?.profile.title !== record.profile.title) void loadProfileBack(record, workflow.get().value).catch(() => undefined)
   }, [machineState])
 }

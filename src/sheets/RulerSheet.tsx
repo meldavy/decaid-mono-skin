@@ -210,7 +210,7 @@ export function RulerSheet({ kind, onClose }: Props) {
 function focusLabel(id: ValueId, title?: string) {
   switch (id) {
     case 'espressoTemp': case 'espressoYield': case 'dose': return `${VALUES[id].label} · ${title?.toUpperCase() ?? ''}`
-    case 'shotTarget': return 'SHOT TARGET · A GOAL'
+    case 'shotTarget': return 'SHOT TARGET'
     case 'hotWaterMax': return 'HOT WATER · LONGEST RUN'
     case 'steamMax': return 'STEAM · LONGEST RUN'
     case 'flushTime': return 'FLUSH · HOW LONG'
@@ -219,8 +219,9 @@ function focusLabel(id: ValueId, title?: string) {
   }
 }
 
-// Only what changes how the value behaves: without a scale, weight targets don't stop anything.
+// What the value does, where that isn't obvious: the shot target stops nothing, and without a scale weight targets don't either.
 function note(id: ValueId, hasScale: boolean) {
+  if (id === 'shotTarget') return 'This is your shot target time, a baseline used to compare against your actual shot finish time.'
   if (hasScale) return ''
   if (id === 'espressoYield') return 'The shot will stop at this weight when a scale is connected.'
   if (id === 'hotWaterAmount') return 'Hot water will stop by volume until a scale is connected.'

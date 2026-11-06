@@ -17,3 +17,25 @@
 .hist-note-text { font-size: 20px; line-height: 1.35; overflow-wrap: anywhere; white-space: pre-line; }
 .hist-note-text.empty { color: var(--taupe); }
 .hist-detail-empty { border-style: dashed; }
+
+/* Save as recipe: a quiet tile beside Brew again, as tall as it and laid out like it (icon left of the words). */
+.lib-actions .tile-row { align-items: stretch; }
+.tile.hist-recipe-tile { width: auto; height: 72px; flex-direction: row; justify-content: center; padding: 0 22px 0 18px; gap: 12px; }
+.hist-recipe-tile .tile-two-lines { text-align: left; }
+/* The pick-a-shot pop-up: History in a panel over the Beans screen. */
+.shot-picker { position: absolute; inset: 16px; border-radius: 28px; background: var(--ground); overflow: hidden; }
+.shot-picker .library { padding: 24px; }
+@media (max-height: 700px) {
+  .tile.hist-recipe-tile { height: 60px; }
+  .shot-picker { inset: 10px; }
+  .shot-picker .library { padding: 16px; }
+}
+
+/* What the shot was set up with: a grid under the numbers, people's names wrapping rather than cut. */
+.hist-settings { display: flex; flex-direction: column; gap: 12px; padding-top: 14px; border-top: 1px solid var(--rule); }
+.hist-settings-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 16px; }
+.hist-settings-grid > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.hist-settings-grid > .wide { grid-column: span 2; }
+[data-testid='recipe-machine'] .hist-settings-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hist-setting { font-size: 20px; line-height: 1.2; overflow-wrap: anywhere; }
+@media (max-height: 700px) { .hist-setting { font-size: 18px; } }

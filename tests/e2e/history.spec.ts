@@ -22,7 +22,7 @@ async function keepShot<T>(id: string, work: () => Promise<T>) {
   try {
     return await work()
   } finally {
-    await decaid('PUT', `/api/v1/shots/${id}`, { annotations: { enjoyment: before.annotations?.enjoyment ?? null, espressoNotes: before.annotations?.espressoNotes ?? null }, workflow: { context: { grinderSetting: before.workflow?.context?.grinderSetting ?? null, coffeeName: before.workflow?.context?.coffeeName ?? null, coffeeRoaster: before.workflow?.context?.coffeeRoaster ?? null } } })
+    await decaid('PUT', `/api/v1/shots/${id}`, { annotations: { enjoyment: before.annotations?.enjoyment ?? null, espressoNotes: before.annotations?.espressoNotes ?? null }, workflow: { context: { grinderSetting: before.workflow?.context?.grinderSetting ?? null, coffeeName: before.workflow?.context?.coffeeName ?? null, coffeeRoaster: before.workflow?.context?.coffeeRoaster ?? null, beanBatchId: (before.workflow?.context as { beanBatchId?: string } | undefined)?.beanBatchId ?? null } } })
   }
 }
 
@@ -86,33 +86,47 @@ test.describe('History', () => {
 
   test('HIST-03 DONE-09 note, grind and coffee are saved to the shot and shown', async ({ page }) => {
     const { items } = await newest(1)
+    const bean = await decaid<{ id: string }>('POST', '/api/v1/beans', { roaster: 'The Big Roasters', name: 'Brasilia' })
+    const bag = await decaid<{ id: string }>('POST', `/api/v1/beans/${bean.id}/batches`, { weight: 250 })
+    try {
     await keepShot(items[0].id, async () => {
       await open(page)
       await page.getByTestId('shot-note').click()
       const sheet = page.getByRole('dialog', { name: 'Shot notes' })
       await sheet.getByTestId('notes-input').fill('Bright, a touch sour — one step finer.')
       await sheet.getByTestId('grind-input').fill('2.5')
-      await sheet.getByTestId('roaster-input').fill('The Big Roasters')
-      await sheet.getByTestId('coffee-input').fill('Brasilia')
+      await sheet.getByTestId('coffee-pick').click()
+      const picker = page.getByRole('dialog', { name: 'Coffee and grinder for this shot' })
+      await picker.getByRole('radio', { name: /Brasilia/ }).click()
+      await picker.getByRole('button', { name: 'DONE' }).click()
+      await expect(sheet.getByTestId('coffee-pick')).toContainText('The Big Roasters, Brasilia')
       await sheet.getByRole('button', { name: 'SAVE' }).click()
       await expect(sheet).toBeHidden()
       await expect(page.getByTestId('shot-note')).toContainText('Bright, a touch sour — one step finer.')
-      await expect(page.getByTestId('shot-note')).toContainText('NOTE · GRIND 2.5')
+      await expect(page.getByTestId('shot-settings')).toContainText('2.5')
+      await expect(page.getByTestId('shot-settings')).toContainText('The Big Roasters, Brasilia')
       const saved = await decaid<Shot>('GET', `/api/v1/shots/${items[0].id}`)
       expect(saved.annotations?.espressoNotes).toBe('Bright, a touch sour — one step finer.')
       expect(saved.workflow?.context?.grinderSetting).toBe('2.5')
-      expect(saved.workflow?.context).toMatchObject({ coffeeRoaster: 'The Big Roasters', coffeeName: 'Brasilia' })
+      expect(saved.workflow?.context).toMatchObject({ coffeeRoaster: 'The Big Roasters', coffeeName: 'Brasilia', beanBatchId: bag.id })
       await expect(detail(page)).toContainText('The Big Roasters, Brasilia')
     })
+    } finally {
+      await decaid('DELETE', `/api/v1/bean-batches/${bag.id}`).catch(() => undefined)
+      await decaid('DELETE', `/api/v1/beans/${bean.id}`).catch(() => undefined)
+    }
   })
 
   test('HIST-05 upload shows only with the Visualizer plugin running; success and failure messages', async ({ page }) => {
-    await open(page)
-    await expect(detail(page).getByRole('button', { name: 'UPLOAD' })).toHaveCount(0)
+    // The simulator may or may not run Visualizer; the test decides.
+    let running = false
     await page.route('**/api/v1/plugins', async (r) => {
       const list = await (await r.fetch()).json()
-      await r.fulfill({ json: list.map((p: { id: string }) => (p.id === 'visualizer.reaplugin' ? { ...p, autoLoad: true, loaded: true } : p)) })
+      await r.fulfill({ json: list.map((p: { id: string }) => (p.id === 'visualizer.reaplugin' ? { ...p, autoLoad: running, loaded: running } : p)) })
     })
+    await open(page)
+    await expect(detail(page).getByRole('button', { name: 'UPLOAD' })).toHaveCount(0)
+    running = true
     let fail = false
     let sent: unknown = null
     await page.route('**/api/v1/plugins/visualizer.reaplugin/upload', (r) => {

@@ -231,6 +231,7 @@ test.describe('Ruler sheets', () => {
 
   test('SHEET-15 shot target saves per profile in Mono\'s store; the default is not stored', async ({ page, profiles }) => {
     await open(page, 'time')
+    await expect(page.getByTestId('sheet-note')).toHaveText('This is your shot target time, a baseline used to compare against your actual shot finish time.')
     expect(await decaid('GET', '/api/v1/store/mono/target-times')).toBeNull()
     await page.getByRole('button', { name: 'Increase' }).click()
     await page.getByRole('button', { name: 'Increase' }).click()

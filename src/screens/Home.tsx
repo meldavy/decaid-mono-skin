@@ -6,11 +6,16 @@ import { lastShots } from '../state/history'
 import { machineConnected, SCALE_STALE_MS, scaleConnected, useLive } from '../state/live'
 import { isRunning, machineInfo, requestState, StartBlocked, tare, thermalStatus, type RequestedState } from '../state/machine'
 import { DEFAULT_TARGET_TIME, prefsResource, targetTimes, withDefaults } from '../state/prefs'
-import { activeProfileId, loadProfile, profiles } from '../state/profiles'
+import { activeProfileId, profiles } from '../state/profiles'
 import { useNow, useResource } from '../state/resource'
 import { ttrSeconds } from '../state/timeToReady'
 import { tankPercent } from '../state/water'
 import { workflow } from '../state/workflow'
+import { bags, beans, chooseBag, chooseGrinder, grinders, nextCoffee, setGrind } from '../state/coffee'
+import { CoffeeSheet } from '../sheets/CoffeeSheet'
+import { dye2Selection, recipeSlots, slotEntries } from '../state/recipeSlots'
+import { applyRecipe, loadProfileBack, recipeName, recipeProfile, recipes, type Recipe } from '../state/recipes'
+import { TextSheet } from '../ui/Sheets'
 import { DotChart } from '../ui/DotChart'
 import { FavDetail } from './Favourites'
 import type { EditTarget } from './Library'
@@ -27,12 +32,13 @@ import { useSize } from '../ui/useSize'
 import './home.css'
 
 export type SheetKind = 'temp' | 'dose' | 'yield' | 'time'
-export type Screen = 'library' | 'history' | 'settings'
+export type Screen = 'library' | 'history' | 'settings' | 'beans'
 
 interface Props {
   onOpenSheet: (kind: SheetKind) => void
   onNavigate: (screen: Screen) => void
   onEdit: (target: EditTarget) => void
+  onOpenRecipe: (id: string) => void
 }
 
 const SETTLE_MS = 500
@@ -55,7 +61,7 @@ const SNAP_MS = 180 // a card swapped in mid-drag slides to its landing spot in 
 const RESIST = 90 // past the first or last card, the strip gives at most this far
 const HEADLINE = { nolink: 'NO LINK', offline: 'NO MACHINE', stale: 'NO DATA', asleep: 'ASLEEP', heating: 'HEATING', ready: 'READY', busy: 'BUSY' } as const
 
-export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
+export function Home({ onOpenSheet, onNavigate, onEdit, onOpenRecipe }: Props) {
   const live = useLive((l) => l)
   const now = useNow(1_000)
   const prefs = withDefaults(useResource(prefsResource).value)
@@ -63,6 +69,9 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
   const records = useResource(profiles).value ?? []
   const slots = useResource(favourites).value ?? new Array<string | null>(SLOT_COUNT).fill(null)
   const targets = useResource(targetTimes).value ?? {}
+  const notes = useResource(recipeSlots).value
+  const allRecipes = useResource(recipes).value ?? []
+  const selection = useResource(dye2Selection).value
 
   // The mini plan chart is pinned to the display grid: 27 px from the left, its top a whole number of rows.
   const [displayBox, displaySize] = useSize<HTMLElement>()
@@ -78,8 +87,14 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
   // Without a link nothing on the display is current, so show nothing rather than old numbers.
   const showLive = linkOpen && connected && !!live.machine
   const byId = useMemo(() => new Map(records.map((r) => [r.id, r])), [records])
-  const activeId = activeProfileId(wf?.profile, records, slots)
-  const activeSlot = activeId ? slots.indexOf(activeId) : -1
+  const recipesById = useMemo(() => new Map(allRecipes.map((r) => [r.id, r])), [allRecipes])
+  // A slot holds a profile or a recipe (see state/recipeSlots). A recipe's card is the active one while DYE2 says
+  // it's the selected recipe; otherwise the profile on the machine marks its plain profile card.
+  const entries = useMemo(() => slotEntries(slots, notes, new Set(recipesById.keys())), [slots, notes, recipesById])
+  const profileSlots = useMemo(() => entries.map((e) => (e?.kind === 'profile' ? e.id : null)), [entries])
+  const activeId = activeProfileId(wf?.profile, records, profileSlots)
+  const recipeActive = selection?.kind === 'recipe' ? entries.findIndex((e) => e?.kind === 'recipe' && e.id === selection.id) : -1
+  const activeSlot = recipeActive >= 0 ? recipeActive : activeId ? profileSlots.indexOf(activeId) : -1
   // The machine's profile isn't a favourite: it gets a sixth card at the end, until a favourite is chosen.
   // Card objects stay the same between renders unless the favourites, profiles or machine profile change, so the
   // cards (and their charts) aren't redrawn on every live reading.
@@ -87,8 +102,16 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
     const extra: Card | null = wf && activeSlot < 0
       ? { id: activeId, profile: activeId ? byId.get(activeId)!.profile : wf.profile }
       : null
-    return [...slots.map((id) => (id && byId.get(id) ? { id, profile: byId.get(id)!.profile } : null)), ...(extra ? [extra] : [])]
-  }, [slots, byId, wf, activeId, activeSlot])
+    const card = (e: (typeof entries)[number]): Card | null => {
+      if (e?.kind === 'recipe') {
+        const recipe = recipesById.get(e.id)!
+        const profile = recipeProfile(recipe)
+        return profile ? { id: null, profile, recipe } : null
+      }
+      return e && byId.get(e.id) ? { id: e.id, profile: byId.get(e.id)!.profile } : null
+    }
+    return [...entries.map(card), ...(extra ? [extra] : [])]
+  }, [entries, recipesById, byId, wf, activeId, activeSlot])
   const activeIndex = activeSlot >= 0 ? activeSlot : wf ? cards.length - 1 : -1
 
   // Carousel focus. Follows the machine's profile unless the person is mid-swipe.
@@ -110,16 +133,33 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
     setFocus(index)
     clearTimeout(settleTimer.current)
     settleTimer.current = setTimeout(async () => {
-      const id = index < SLOT_COUNT ? slots[index] : null
+      const recipe = index < SLOT_COUNT ? cards[index]?.recipe : undefined
+      if (recipe) {
+        if (index === activeSlot) { userMoved.current = false; setSettling(false); return }
+        setLoading(recipe.id)
+        try {
+          await applyRecipe(recipe)
+          await dye2Selection.refresh()
+        } catch (error) {
+          errorToast(error)
+        } finally {
+          setLoading(null)
+          setSettling(false)
+          userMoved.current = false
+        }
+        return
+      }
+      const id = index < SLOT_COUNT ? profileSlots[index] : null
       const record = id ? byId.get(id) : undefined
-      if (!record || record.id === activeId) {
+      if (!record || (record.id === activeId && recipeActive < 0)) {
         userMoved.current = false
         setSettling(false)
         return
       }
       setLoading(record.id)
       try {
-        await loadProfile(record, wf)
+        await loadProfileBack(record, wf) // from a recipe: the profile settings come back too
+        if (selection?.kind === 'recipe') await dye2Selection.refresh()
       } catch (error) {
         errorToast(error)
       } finally {
@@ -228,6 +268,9 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
   settleRef.current = settleOn
   const selectCard = useCallback((i: number) => settleRef.current(i), [])
   const openCard = useCallback((id: string) => setDetailId(id), [])
+  const openRecipeRef = useRef(onOpenRecipe)
+  openRecipeRef.current = onOpenRecipe
+  const openRecipe = useCallback((id: string) => openRecipeRef.current(id), [])
 
   const [starting, setStarting] = useState<RequestedState | null>(null)
   const startingRef = useRef(false) // state updates too late to stop taps in the same frame
@@ -257,6 +300,10 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
   const detail = detailId ? records.find((r) => r.id === detailId) : undefined
   const targetTime = activeId && targets[activeId] ? targets[activeId] : DEFAULT_TARGET_TIME
   const espressoTemp = wf?.profile.steps[0]?.temperature
+  const coffee = nextCoffee(wf?.context, { beans: useResource(beans).value ?? [], bags: useResource(bags).value ?? [], grinders: useResource(grinders).value ?? [] })
+  const [coffeeOpen, setCoffeeOpen] = useState(false)
+  const [grindOpen, setGrindOpen] = useState(false)
+  const coffeeLine = [coffee.coffee, coffee.grinderName].filter(Boolean).join(' · ')
 
   return (
     <div className="home">
@@ -294,6 +341,7 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
         <header className="home-header">
           <span />
           <nav className="home-nav">
+            <button type="button" className="nav-button two-lines" aria-label="Beans and recipes" onClick={() => onNavigate('beans')}><DotIcon glyph="beans" /><span className="label nav-two-lines">BEANS &amp;{' '}<br />RECIPES</span></button>
             <button type="button" className="nav-button" aria-label="All profiles" onClick={() => onNavigate('library')}><DotIcon glyph="profiles" /><span className="label">PROFILES</span></button>
             <button type="button" className="nav-button" aria-label="History" onClick={() => onNavigate('history')}><DotIcon glyph="history" /><span className="label">HISTORY</span></button>
             <button type="button" className="nav-button" aria-label="Sleep" disabled={!connected || state === 'sleeping'} onClick={() => start('sleeping')}><DotIcon glyph="zz" /><span className="label">SLEEP</span></button>
@@ -302,12 +350,16 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
         </header>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* The next shot's coffee and grinder: quiet, above the card, tap to choose. */}
+          <button type="button" className={`coffee-line${coffeeLine ? '' : ' empty'}`} aria-label={coffeeLine ? `Coffee and grinder: ${coffeeLine}` : 'Choose coffee and grinder'} onClick={() => setCoffeeOpen(true)} data-testid="coffee-line">
+            <span className="one-line">{coffeeLine || 'Choose coffee and grinder'}</span>
+          </button>
           <div className="carousel" aria-label="Favourite profiles" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerCancel}>
             <div className="carousel-track" ref={track} style={{ transform: `translateX(${restX}px)` }}>
               {/* Every card is drawn in both forms once; a swap only flips which one shows, so nothing is redrawn mid-swipe. */}
               {cards.map((card, i) => (
                 <div key={i} className={`card-slot${i === focus ? ' is-main' : ''}${swapped.current ? ' grow' : ''}`}>
-                  <MainCard index={i} count={cards.length} card={card} shown={i === focus} active={i === activeIndex} loading={!!card?.id && loading === card.id} onOpen={card?.id && byId.has(card.id) ? openCard : undefined} />
+                  <MainCard index={i} count={cards.length} card={card} shown={i === focus} active={i === activeIndex} loading={!!loading && loading === (card?.recipe?.id ?? card?.id)} onOpen={card?.recipe ? openRecipe : card?.id && byId.has(card.id) ? openCard : undefined} />
                   <SideCard index={i} card={card} shown={i !== focus} before={i < focus} onSelect={selectCard} />
                 </div>
               ))}
@@ -321,6 +373,7 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
         <div className="values">
           <Value label={`TEMP ${tempLabel(units)}`} value={espressoTemp === undefined ? NONE : fixed(toUnit(espressoTemp, units), 0)} onClick={() => onOpenSheet('temp')} testId="value-temp" />
           <Value label="DOSE G" value={fixed(wf?.context?.targetDoseWeight, 1)} onClick={() => onOpenSheet('dose')} testId="value-dose" />
+          <Value label="GRIND" value={coffee.grind ?? NONE} onClick={() => setGrindOpen(true)} testId="value-grind" />
           <Value label="YIELD G" value={fixed(wf?.context?.targetYield, 1)} onClick={() => onOpenSheet('yield')} testId="value-yield" />
           <Value label="TIME S" value={String(targetTime)} onClick={() => onOpenSheet('time')} testId="value-time" />
         </div>
@@ -334,6 +387,16 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
           <button type="button" className="primary" disabled={!brewReady} onClick={() => start('espresso')}><DotIcon glyph="brew" color="var(--on-primary)" primary />BREW</button>
         </div>}
       </section>
+      {coffeeOpen && (
+        <CoffeeSheet
+          title="Coffee and grinder for the next shot"
+          initial={{ bagId: wf?.context?.beanBatchId as string | undefined, coffee: coffee.coffee, roaster: coffee.roaster, grinderId: wf?.context?.grinderId as string | undefined }}
+          onCancel={() => setCoffeeOpen(false)}
+          onManage={() => { setCoffeeOpen(false); onNavigate('beans') }}
+          onDone={(c) => { setCoffeeOpen(false); void Promise.all([chooseBag(c.bean, c.bag), chooseGrinder(c.grinder)]).catch(errorToast) }}
+        />
+      )}
+      {grindOpen && <TextSheet label="GRIND · NEXT SHOT" value={coffee.grind ?? ''} multiline={false} maxLength={24} onCancel={() => setGrindOpen(false)} onDone={(v) => { setGrindOpen(false); if (v !== (coffee.grind ?? '')) void setGrind(v).catch(errorToast) }} />}
       {detail && <FavDetail record={detail} slots={slots} units={units} onClose={() => setDetailId(null)} onEdit={onEdit} />}
     </div>
   )
@@ -343,12 +406,12 @@ function Value({ label, value, onClick, testId }: { label: string; value: string
   return (
     <button type="button" className="value" onClick={onClick} data-testid={testId}>
       <span className="label">{label}</span>
-      <span className="v">{value}</span>
+      <span className="v one-line">{value}</span>
     </button>
   )
 }
 
-interface Card { id: string | null; profile: Profile }
+interface Card { id: string | null; profile: Profile; recipe?: Recipe }
 
 
 // A card's hidden form stays drawn (so showing it costs nothing) but is out of reach: no taps, focus or screen reader.
@@ -362,10 +425,10 @@ const SideCard = memo(function SideCard({ index, card, shown, before, onSelect }
       </div>
     )
   }
-  const title = card.profile.title
+  const title = card.recipe ? recipeName(card.recipe) : card.profile.title
   return (
     <button type="button" className={`card-side${before ? ' before' : ''}`} onClick={() => onSelect(index)} aria-label={shown ? `Slot ${index + 1}, ${title}` : undefined} aria-hidden={!shown || undefined} tabIndex={shown ? undefined : -1}>
-      <span className="label">{slotNo(index)}</span>
+      <span className="label">{slotNo(index)}{card.recipe ? ' · RECIPE' : ''}</span>
       <span className="name" style={titleStyle(title, SIDE_TITLE)}>{title || 'Untitled'}</span>
       <DotChart stages={planStages(card.profile)} mode="field" cols={26} rows={6} label={`${title} plan`} />
     </button>
@@ -374,10 +437,12 @@ const SideCard = memo(function SideCard({ index, card, shown, before, onSelect }
 
 // Tapping the card in front opens its details (read-only).
 const MainCard = memo(function MainCard({ index, count, card, shown, active, loading, onOpen: open }: { index: number; count: number; card: Card | null; shown: boolean; active: boolean; loading: boolean; onOpen?: (id: string) => void }) {
-  const onOpen = shown && open && card?.id ? () => open(card.id!) : undefined
-  const title = card?.profile.title
+  const openId = card?.recipe?.id ?? card?.id
+  const onOpen = shown && open && openId ? () => open(openId) : undefined
+  const title = card?.recipe ? recipeName(card.recipe) : card?.profile.title
   const last = useResource(lastShots)
-  const line = !card ? 'Add one in Manage favourites' : last.loaded && last.value ? lastShotLine(last.value.byTitle.get(card.profile.title), last.value.all, new Date()) : ''
+  // A recipe's line says which profile it brews; a profile's says when it was last brewed.
+  const line = !card ? 'Add one in Manage favourites' : card.recipe ? `Recipe · ${card.profile.title}` : last.loaded && last.value ? lastShotLine(last.value.byTitle.get(card.profile.title), last.value.all, new Date()) : ''
   return (
     <article className="card-main" aria-label={!shown ? undefined : title ? `Slot ${index + 1}, ${title}${active ? ', selected' : ''}` : `Slot ${index + 1}, empty`} data-testid={shown ? 'main-card' : undefined} aria-hidden={!shown || undefined} role={onOpen ? 'button' : undefined} tabIndex={onOpen ? 0 : undefined} aria-haspopup={onOpen ? 'dialog' : undefined} onClick={onOpen} onKeyDown={(e) => { if (onOpen && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onOpen() } }} style={onOpen ? { cursor: 'pointer' } : undefined}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>

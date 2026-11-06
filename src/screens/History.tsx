@@ -7,6 +7,11 @@ import { useResource } from '../state/resource'
 import { plugins } from '../state/settings'
 import { enjoymentToStars, starsToEnjoyment, stopReasonLabel, updateShot } from '../state/shots'
 import { saveWorkflow } from '../state/workflow'
+import { dye2Loaded, recipeName, recipes, saveShotAsRecipe } from '../state/recipes'
+import { bags, roastAge } from '../state/coffee'
+import { roastedLabel } from '../ui/coffeeFormat'
+import { tempLabel, toUnit } from '../ui/format'
+import { TextSheet } from '../ui/Sheets'
 import { DISPLAY_PITCH, DotChart } from '../ui/DotChart'
 import { chartCols } from '../ui/fit'
 import { useShort } from '../ui/useShort'
@@ -19,11 +24,14 @@ import './library.css'
 import '../sheets/sheet.css' // the rating pips are the Rate sheet's
 import './history.css'
 
-// History: shots grouped by day on the left, the chosen shot on the right.
-export function History({ onBack, onBrewAgain }: { onBack: () => void; onBrewAgain: () => void }) {
+// History: shots grouped by day on the left, the chosen shot on the right. With `pick`, the pop-up that makes a
+// recipe from a recent shot: only the latest page of shots, and Create recipe as the one action.
+export function History({ onBack, onBrewAgain, pick }: { onBack: () => void; onBrewAgain?: () => void; pick?: { onSaved: (recipeId: string) => void } }) {
   const prefs = withDefaults(useResource(prefsResource).value)
   const plugs = useResource(plugins).value ?? []
-  const canUpload = plugs.some((p) => p.id === VISUALIZER && p.loaded === true)
+  const canUpload = !pick && plugs.some((p) => p.id === VISUALIZER && p.loaded === true)
+  const canRecipe = dye2Loaded(plugs)
+  const [naming, setNaming] = useState<StoredShot | null>(null)
   const [query, setQuery] = useState('')
   const [search, setSearch] = useState('')
   const [list, setList] = useState<StoredShot[]>([])
@@ -73,7 +81,7 @@ export function History({ onBack, onBrewAgain }: { onBack: () => void; onBrewAga
 
   // Progressive loading: the next page when the end of the list scrolls into view.
   const sentinel = useRef<HTMLDivElement | null>(null)
-  const more = total !== null && list.length < total
+  const more = !pick && total !== null && list.length < total
   useEffect(() => {
     const el = sentinel.current
     if (!el || !more || loading) return
@@ -109,8 +117,16 @@ export function History({ onBack, onBrewAgain }: { onBack: () => void; onBrewAga
     const c = shot.workflow.context
     try {
       await saveWorkflow({ profile: shot.workflow.profile as Profile, context: { ...(c?.targetDoseWeight ? { targetDoseWeight: c.targetDoseWeight } : {}), ...(c?.targetYield ? { targetYield: c.targetYield } : {}) } })
-      onBrewAgain()
+      onBrewAgain?.()
     } catch (error) { errorToast(error, "Couldn't load that shot's recipe.") }
+  }
+
+  const saveRecipe = async (target: StoredShot, name: string) => {
+    try {
+      const saved = await saveShotAsRecipe(full.get(target.id) ?? target, name)
+      toast(`Saved “${saved.name}” · set for the next shot`)
+      pick?.onSaved(saved.id)
+    } catch (error) { errorToast(error, "Couldn't save the recipe. Is DYE2 up to date?") }
   }
 
   const upload = async () => {
@@ -128,8 +144,8 @@ export function History({ onBack, onBrewAgain }: { onBack: () => void; onBrewAga
   return (
     <div className="library history" data-testid="history">
       <header className="lib-header">
-        <button type="button" className="icon-button ringed" aria-label="Back to home" onClick={onBack}><DotIcon glyph="back" color="var(--brown-ink)" /></button>
-        <h1 className="lib-title">History</h1>
+        <button type="button" className="icon-button ringed" aria-label={pick ? 'Close' : 'Back to home'} onClick={onBack}><DotIcon glyph={pick ? 'close' : 'back'} color="var(--brown-ink)" /></button>
+        <h1 className="lib-title">{pick ? 'Pick a shot' : 'History'}</h1>
         <label className="lib-search">
           <DotIcon glyph="search" color="var(--taupe)" />
           <input type="search" aria-label="Search shots" placeholder={placeholder} value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -155,16 +171,45 @@ export function History({ onBack, onBrewAgain }: { onBack: () => void; onBrewAga
             shot={shot}
             summary={full.has(shot.id) ? summarize(full.get(shot.id)!) : null}
             clockFormat={prefs.clock}
+            units={prefs.units}
             canUpload={canUpload}
             uploading={uploading}
             onRate={rate}
             onNote={() => setNotesFor(shot.id)}
             onUpload={upload}
-            onBrewAgain={brewAgain}
+            onBrewAgain={pick ? undefined : brewAgain}
+            onSaveRecipe={canRecipe ? () => setNaming(shot) : undefined}
+            pick={!!pick}
           />
         ) : <section className="lib-detail hist-detail-empty" aria-label="Shot" />}
       </div>
+      {naming && (
+        <TextSheet label="RECIPE NAME" value={suggestName(naming)} multiline={false} maxLength={60}
+          note="Saving also sets this shot up as your next shot."
+          onCancel={() => setNaming(null)}
+          onDone={(name) => { const s = naming; setNaming(null); if (name) void saveRecipe(s, name) }} />
+      )}
       {notesFor && <NotesSheet shotId={notesFor} onClose={() => { const id = notesFor; setNotesFor(null); void refresh(id) }} />}
+    </div>
+  )
+}
+
+// The coffee and the profile, which is usually what tells two recipes apart.
+const suggestName = (shot: StoredShot) => [shot.workflow?.context?.coffeeName, shot.workflow?.profile?.title].filter((x) => x && x.trim()).join(' · ').slice(0, 60)
+
+// The pick-a-shot pop-up (Beans → Recipes → New). Closes with the new recipe's id once one is saved.
+export function ShotPicker({ onClose }: { onClose: (recipeId?: string) => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !document.querySelector('.sheet-layer .sheet') && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="sheet-layer shot-picker-layer">
+      <div className="scrim" onClick={() => onClose()} data-testid="picker-scrim" />
+      <div className="shot-picker" role="dialog" aria-modal="true" aria-label="Pick a shot for a recipe">
+        <History onBack={() => onClose()} pick={{ onSaved: (id) => onClose(id) }} />
+      </div>
     </div>
   )
 }
@@ -206,21 +251,23 @@ interface DetailProps {
   shot: StoredShot
   summary: ShotSummary | null
   clockFormat: '12' | '24'
+  units: 'c' | 'f'
   canUpload: boolean
   uploading: boolean
   onRate: (stars: number) => void
   onNote: () => void
   onUpload: () => void
-  onBrewAgain: () => void
+  onBrewAgain?: () => void
+  onSaveRecipe?: () => void
+  pick: boolean
 }
 
-function ShotDetail({ shot, summary, clockFormat, canUpload, uploading, onRate, onNote, onUpload, onBrewAgain }: DetailProps) {
+function ShotDetail({ shot, summary, clockFormat, units, canUpload, uploading, onRate, onNote, onUpload, onBrewAgain, onSaveRecipe, pick }: DetailProps) {
   const when = new Date(shot.timestamp)
   const day = groupByDay([shot], new Date())[0]?.label ?? ''
   const title = shot.workflow?.profile?.title || 'Untitled'
   const stars = enjoymentToStars(shot.annotations?.enjoyment)
   const note = shot.annotations?.espressoNotes?.trim()
-  const grind = shot.workflow?.context?.grinderSetting?.trim()
   const stages = useMemo(() => (shot.workflow?.profile?.steps ? planStages(shot.workflow.profile as Profile) : []), [shot.workflow?.profile])
   const sub = beanLine(shot, summary?.dose ?? null)
   const [chartRef, { width: chartWidth }] = useSize<HTMLDivElement>()
@@ -244,6 +291,7 @@ function ShotDetail({ shot, summary, clockFormat, canUpload, uploading, onRate, 
           <Stat label="RATIO" value={summary?.ratio ? `1:${summary.ratio.toFixed(1)}` : NONE} />
           <Stat label="PEAK BAR" value={fixed(summary?.peakPressure, 1)} />
         </div>
+        <ShotSettings shot={shot} units={units} />
         {/* Rating then note, each under a divider; the pips are the Rate sheet's. */}
         <div className="hist-rating">
           <span className="label">RATING</span>
@@ -256,7 +304,7 @@ function ShotDetail({ shot, summary, clockFormat, canUpload, uploading, onRate, 
           </div>
         </div>
         <button type="button" className="hist-note" onClick={onNote} data-testid="shot-note">
-          <span className="label">{grind ? `NOTE · GRIND ${grind.toUpperCase()}` : 'NOTE'}</span>
+          <span className="label">NOTE</span>
           <span className={note ? 'hist-note-text' : 'hist-note-text empty'}>{note || 'Add a note'}</span>
         </button>
       </div>
@@ -264,9 +312,57 @@ function ShotDetail({ shot, summary, clockFormat, canUpload, uploading, onRate, 
         <div className="chips">
           {canUpload && <button type="button" className="pill" disabled={uploading} onClick={onUpload}>{uploading ? 'UPLOADING…' : 'UPLOAD'}</button>}
         </div>
-        <button type="button" className="primary lib-select" disabled={!shot.workflow?.profile} onClick={onBrewAgain}><DotIcon glyph="brew" color="var(--on-primary)" primary />BREW AGAIN</button>
+        {pick
+          ? <button type="button" className="primary lib-select" disabled={!shot.workflow?.profile || !onSaveRecipe} onClick={onSaveRecipe}><DotIcon glyph="plus" color="var(--on-primary)" primary />CREATE RECIPE</button>
+          : <div className="tile-row">
+              {onSaveRecipe && <button type="button" className="tile two-lines hist-recipe-tile" aria-label="Save as a recipe" disabled={!shot.workflow?.profile} onClick={onSaveRecipe}><DotIcon glyph="beans" /><span className="tile-two-lines">SAVE AS<br />RECIPE</span></button>}
+              <button type="button" className="primary lib-select" disabled={!shot.workflow?.profile} onClick={onBrewAgain}><DotIcon glyph="brew" color="var(--on-primary)" primary />BREW AGAIN</button>
+            </div>}
       </div>
     </section>
+  )
+}
+
+// What the shot was set up with: the recipe it came from, coffee (with the bag's age on the day), grinder and grind,
+// temperature, dose and target yield. Only what was recorded; nothing when none of it was.
+function ShotSettings({ shot, units }: { shot: StoredShot; units: 'c' | 'f' }) {
+  const c = (shot.workflow?.context ?? {}) as Record<string, unknown>
+  const str = (k: string) => (typeof c[k] === 'string' && (c[k] as string).trim() ? (c[k] as string).trim() : undefined)
+  const num = (k: string) => (typeof c[k] === 'number' && (c[k] as number) > 0 ? (c[k] as number) : undefined)
+  const allBags = useResource(bags).value ?? []
+  const allRecipes = useResource(recipes).value ?? []
+  const recipeId = ((c.extras as { dye?: { recipeId?: unknown } } | undefined)?.dye?.recipeId)
+  const recipe = typeof recipeId === 'string' ? allRecipes.find((r) => r.id === recipeId) : undefined
+  const bag = allBags.find((b) => b.id === str('beanBatchId'))
+  const when = new Date(shot.timestamp)
+  const age = roastAge(bag?.roastDate, when)
+  const coffee = [str('coffeeRoaster'), str('coffeeName')].filter(Boolean).join(', ')
+  const roasted = bag ? [roastedLabel(bag.roastDate, when), age !== undefined ? `${age} D OLD` : ''].filter(Boolean).join(' · ') : ''
+  const temp = (shot.workflow?.profile?.steps?.[0] as { temperature?: number } | undefined)?.temperature
+  const items: [string, string | undefined, string?][] = [
+    ['RECIPE', recipe ? recipeName(recipe) : undefined],
+    ['COFFEE', coffee || undefined, roasted || undefined],
+    ['GRINDER', str('grinderModel')],
+    ['GRIND', str('grinderSetting')],
+    [`TEMP ${tempLabel(units)}`, typeof temp === 'number' ? fixed(toUnit(temp, units), 0) : undefined],
+    ['DOSE G', num('targetDoseWeight') !== undefined ? fixed(num('targetDoseWeight'), 1) : undefined],
+    ['TARGET YIELD G', num('targetYield') !== undefined ? fixed(num('targetYield'), 1) : undefined],
+  ]
+  const shown = items.filter(([, v]) => v)
+  if (!shown.length) return null
+  return (
+    <div className="hist-settings" data-testid="shot-settings">
+      <span className="label">SET FOR THIS SHOT</span>
+      <div className="hist-settings-grid">
+        {shown.map(([label, value, sub]) => (
+          <div key={label} className={label === 'COFFEE' || label === 'RECIPE' ? 'wide' : undefined}>
+            <span className="label">{label}</span>
+            <span className="hist-setting">{value}</span>
+            {sub && <span className="label">{sub}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 

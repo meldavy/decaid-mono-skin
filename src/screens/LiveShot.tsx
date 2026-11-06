@@ -20,6 +20,10 @@ import { errorToast, toast } from '../ui/toasts'
 import { snapDown } from '../ui/grid'
 import { useSize } from '../ui/useSize'
 import { NotesSheet } from './NotesSheet'
+import { dye2Loaded, saveShotAsRecipe } from '../state/recipes'
+import { plugins } from '../state/settings'
+import type { StoredShot } from '../domain/history'
+import { TextSheet } from '../ui/Sheets'
 import './live.css'
 
 // The dot-matrix type scale (mirrors --dots-* in tokens.css): Doto's dots are 1/10 of the size apart, so these
@@ -262,6 +266,12 @@ export function ShotScreen() {
 function DoneBar({ shotId, peak, avgFlow, ratio: shotRatio }: { shotId: string | null; peak: number; avgFlow: number; ratio: string }) {
   const [stars, setStars] = useState(0)
   const [notesOpen, setNotesOpen] = useState(false)
+  const canRecipe = dye2Loaded(useResource(plugins).value)
+  const [naming, setNaming] = useState<StoredShot | null>(null)
+  const openRecipe = () => { if (shotId) getShot(shotId).then((s) => setNaming(s as unknown as StoredShot), (e) => errorToast(e)) }
+  const saveRecipe = async (shot: StoredShot, name: string) => {
+    try { const r = await saveShotAsRecipe(shot, name); toast(`Saved “${r.name}” as a recipe`) } catch (error) { errorToast(error, "Couldn't save the recipe. Is DYE2 up to date?") }
+  }
   // Decaid saves the shot a few seconds after it ends, and doesn't save one stopped almost at once.
   const [saved, setSaved] = useState<'checking' | 'yes' | 'no'>('checking')
 
@@ -286,9 +296,16 @@ function DoneBar({ shotId, peak, avgFlow, ratio: shotRatio }: { shotId: string |
   return (
     <div className="live-bottom">
       <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+        <div className="tile-row">
         <button type="button" className="tile" data-testid="rate-tile" aria-label={stars ? `Rate, rated ${stars} of 5` : 'Rate'} disabled={saved !== 'yes'} onClick={() => setNotesOpen(true)}>
           <DotIcon glyph="heart" />RATE
         </button>
+        {canRecipe && (
+          <button type="button" className="tile two-lines" data-testid="recipe-tile" aria-label="Save as a recipe" disabled={saved !== 'yes'} onClick={openRecipe}>
+            <DotIcon glyph="beans" /><span className="tile-two-lines">SAVE AS<br />RECIPE</span>
+          </button>
+        )}
+        </div>
         <div className="live-readouts">
           <Readout label="RATIO" value={shotRatio} testId="ratio" />
           <Readout label="PEAK BAR" value={fixed(peak, 1)} testId="peak" />
@@ -296,6 +313,11 @@ function DoneBar({ shotId, peak, avgFlow, ratio: shotRatio }: { shotId: string |
         </div>
       </div>
       <button type="button" className="primary" onClick={dismissShot}><DotIcon glyph="check" color="var(--on-primary)" primary />DONE</button>
+      {naming && (
+        <TextSheet label="RECIPE NAME" value={[naming.workflow?.context?.coffeeName, naming.workflow?.profile?.title].filter((x) => x && x.trim()).join(' · ').slice(0, 60)} multiline={false} maxLength={60}
+          onCancel={() => setNaming(null)}
+          onDone={(name) => { const s = naming; setNaming(null); if (name) void saveRecipe(s, name) }} />
+      )}
       {notesOpen && shotId && <NotesSheet shotId={shotId} rating onClose={(result) => { setNotesOpen(false); if (result) setStars(result.stars) }} />}
     </div>
   )

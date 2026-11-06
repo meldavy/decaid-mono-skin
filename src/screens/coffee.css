@@ -1,0 +1,16 @@
+/* Beans builds on the Profiles list + detail layout (library.css). */
+.beans-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 20px; }
+.beans-facts > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.beans-fact { font-size: 20px; line-height: 1.2; overflow-wrap: anywhere; }
+.beans-bags { display: flex; flex-direction: column; gap: 0; padding-top: 14px; border-top: 1px solid var(--rule); }
+.beans-bags > .label { padding-bottom: 6px; }
+.beans-bag { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.beans-bag-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.beans-bag-name { font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; color: var(--ink); }
+.beans-add-bag { align-self: flex-start; margin-top: 12px; }
+.beans-empty-action { margin: 0 16px; }
+
+@media (max-height: 700px) {
+  .beans-fact { font-size: 18px; }
+  .beans-bag .chip { padding: 0 12px; }
+}

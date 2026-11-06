@@ -158,6 +158,10 @@ button { font: inherit; color: inherit; }
 .primary { width: var(--primary-w); height: var(--tile-h); border: none; border-radius: var(--radius-tile); background: var(--brown); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; color: var(--on-primary); font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; }
 .tile:disabled, .primary:disabled { opacity: 0.4; cursor: default; }
 .tile-row { display: flex; gap: var(--tile-gap); }
+/* Icons at the same height in every tile: where a one-line label centres them (icon 27 + gap 12 + label 12). A
+   two-line label (Save as recipe) runs lower instead of lifting its icon. */
+.tile { justify-content: flex-start; padding-top: calc((var(--tile-h) - 51px) / 2); }
+.tile-two-lines { text-align: center; line-height: 1.35; }
 .icon-button { width: var(--icon-hit); height: var(--icon-hit); border: none; border-radius: calc(var(--icon-hit) / 2); background: transparent; display: flex; flex-shrink: 0; align-items: center; justify-content: center; cursor: pointer; color: var(--brown); }
 .icon-button:disabled { opacity: 0.4; cursor: default; }
 

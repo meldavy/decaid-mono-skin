@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { decideKey, keyboardResource, withKeyDefaults } from './state/keyboard'
 import { GHC_MESSAGE, machineInfo, requestState, StartBlocked } from './state/machine'
-import { loadProfile, profiles } from './state/profiles'
+import { profiles } from './state/profiles'
+import { loadProfileBack } from './state/recipes'
 import { useResource } from './state/resource'
 import { workflow } from './state/workflow'
 import { errorToast, toast } from './ui/toasts'
@@ -29,7 +30,7 @@ export function useShortcuts(machineState: string | undefined, onHome: boolean) 
         else if (decision.kind === 'start') await requestState(decision.action === 'sleep' ? 'sleeping' : decision.action)
         else {
           const record = profiles.get().value?.find((p) => p.id === decision.profileId)
-          if (record) await loadProfile(record, workflow.get().value)
+          if (record) await loadProfileBack(record, workflow.get().value)
         }
       } catch (error) {
         if (error instanceof StartBlocked) toast(error.message, 'error')

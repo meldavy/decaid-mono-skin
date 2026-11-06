@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { planStages, type ProfileRecord } from '../domain/profile'
 import { favourites } from '../state/favourites'
 import { prefsResource, withDefaults } from '../state/prefs'
-import { activeProfileId, createProfile, deleteProfile, loadProfile, parseProfileFile, profiles, setVisibility, type ProfileRecordFull } from '../state/profiles'
+import { activeProfileId, createProfile, deleteProfile, parseProfileFile, profiles, setVisibility, type ProfileRecordFull } from '../state/profiles'
 import { useResource } from '../state/resource'
 import { workflow } from '../state/workflow'
+import { loadProfileBack } from '../state/recipes'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { DotChart } from '../ui/DotChart'
 import { DotIcon } from '../ui/DotIcon'
@@ -83,7 +84,7 @@ export function Library({ onBack, onEdit, onManageFavourites }: Props) {
     }
   }
 
-  const select = (r: ProfileRecord) => run(async () => { await loadProfile(r, wf); onBack() })
+  const select = (r: ProfileRecord) => run(async () => { await loadProfileBack(r, wf); onBack() })
   // New and Edit a copy open unsaved drafts: Decaid only creates a profile once its recipe differs.
   const newProfile = () => {
     setMenuOpen(false)
