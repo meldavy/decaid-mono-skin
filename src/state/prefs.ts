@@ -10,7 +10,10 @@ export const ACCENTS = {
   teal: '#3D7F7A',
 } as const
 
+export const THEMES = ['light', 'dark', 'auto'] as const // auto follows the tablet's own dark setting
+
 export interface Prefs {
+  theme: (typeof THEMES)[number]
   accent: keyof typeof ACCENTS
   units: 'c' | 'f'
   clock: '24' | '12'
@@ -22,6 +25,7 @@ export interface Prefs {
 }
 
 export const DEFAULT_PREFS: Prefs = {
+  theme: 'light',
   accent: 'crema',
   units: 'c',
   clock: '24',
@@ -42,6 +46,7 @@ export function withDefaults(stored: Partial<Prefs> | null): Prefs {
     }
   }
   if (!(merged.accent in ACCENTS)) merged.accent = DEFAULT_PREFS.accent
+  if (!THEMES.includes(merged.theme)) merged.theme = DEFAULT_PREFS.theme
   return merged
 }
 

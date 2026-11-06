@@ -331,7 +331,7 @@ export function Home({ onOpenSheet, onNavigate, onEdit }: Props) {
             <button type="button" className="tile" disabled={!canStart} onClick={() => start('hotWater')}><DotIcon glyph="water" />WATER</button>
             <button type="button" className="tile" disabled={!canStart} onClick={() => start('flush')}><DotIcon glyph="flush" />FLUSH</button>
           </div>
-          <button type="button" className="primary" disabled={!brewReady} onClick={() => start('espresso')}><DotIcon glyph="brew" color="#fff" primary />BREW</button>
+          <button type="button" className="primary" disabled={!brewReady} onClick={() => start('espresso')}><DotIcon glyph="brew" color="var(--on-primary)" primary />BREW</button>
         </div>}
       </section>
       {detail && <FavDetail record={detail} slots={slots} units={units} onClose={() => setDetailId(null)} onEdit={onEdit} />}
@@ -403,7 +403,7 @@ const ChartWithLegend = memo(function ChartWithLegend({ card }: { card: Card }) 
       <div className="legend label" data-testid="legend">
         {legend.items.map((it) => (
           <span key={it.no} className="legend-item">
-            <span className="legend-dot" style={{ background: it.tone ? '#D9C8AE' : 'var(--taupe)' }} />
+            <span className="legend-dot" style={{ background: it.tone ? 'var(--line-mid)' : 'var(--taupe)' }} />
             <span>{it.no}</span>
             <span className="legend-name one-line" title={it.name}>{it.name}</span>
             <span>{it.dur}</span>

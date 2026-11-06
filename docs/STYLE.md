@@ -68,6 +68,10 @@ own numbers for these things.
 | `--display-cream` | #EDE3D2 | Type and dots on the display |
 | `--accent` | Crema #C98B2B (setting: Rust, Slate blue, Teal) | Flow on charts only |
 
+Every colour is a token in `src/styles/tokens.css`; components never hard-code one. Dark mode (Settings → Look &
+sound → Theme: Light, Dark, Match the tablet) redefines the tokens under `:root[data-theme='dark']`: a near-black
+ground, cream type, lighter brown actions with dark type on them. The brown display keeps its colour in both themes.
+
 ## Iconography
 
 - **Icon dots**: 3 px apart (3 × 3 per 9 px grid cell), radius 1.08 px, for every icon. Icons are designed on

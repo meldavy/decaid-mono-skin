@@ -224,9 +224,9 @@ test.describe('Ruler sheets', () => {
     })
     await page.reload()
     await page.getByTestId('value-yield').click()
-    await expect(page.getByTestId('sheet-note')).toHaveText("No scale: the shot won't stop at weight.")
+    await expect(page.getByTestId('sheet-note')).toHaveText('The shot will stop at this weight when a scale is connected.')
     await page.getByTestId('tab-hotWaterAmount').click()
-    await expect(page.getByTestId('sheet-note')).toHaveText('No scale: stops by volume.')
+    await expect(page.getByTestId('sheet-note')).toHaveText('Hot water will stop by volume until a scale is connected.')
   })
 
   test('SHEET-15 shot target saves per profile in Mono\'s store; the default is not stored', async ({ page, profiles }) => {

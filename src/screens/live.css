@@ -12,14 +12,14 @@
 .stage-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--taupe); }
 .stage-line { --dot: var(--taupe); position: relative; flex-grow: 1; height: 4px; background: radial-gradient(circle, var(--dot) 1.2px, transparent 1.5px) left center / 6px 4px repeat-x; }
 .stage-line-lit { --dot: var(--brown); position: absolute; left: 0; top: 0; bottom: 0; background: inherit; background-image: radial-gradient(circle, var(--dot) 1.2px, transparent 1.5px); }
-.stage.next .stage-dot { background: #e6dccc; }
-.stage.next .stage-line { --dot: #e6dccc; }
+.stage.next .stage-dot { background: var(--line); }
+.stage.next .stage-line { --dot: var(--line); }
 .stage.current .stage-dot { background: transparent; border: 2px solid var(--brown); }
-.stage.current .stage-line { --dot: #d9c8ae; }
+.stage.current .stage-line { --dot: var(--line-mid); }
 .stage.current .stage-line-lit { --dot: var(--brown); }
 .stage-name { line-height: 1.05; color: var(--taupe); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: break-word; }
 .stage.current .stage-name { line-height: 0.95; letter-spacing: -0.03em; color: var(--ink); }
-.stage.next .stage-name, .stage.next .stage-meta { color: #9c8870; }
+.stage.next .stage-name, .stage.next .stage-meta { color: var(--muted); }
 /* The display takes the height left between header and buttons; its contents size to it. */
 /* The display takes the height left; inside, everything with dots is pinned to its 9 px grid from the
    top-left (padding, column width and gaps are multiples of 9; heights are set in whole rows). */

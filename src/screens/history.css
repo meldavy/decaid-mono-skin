@@ -10,7 +10,7 @@
 .hist-rate span { border-radius: 50%; }
 .hist-more { padding: 16px; min-height: 24px; text-align: center; }
 .hist-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.hist-sub { font-size: 17px; font-style: italic; color: #5b4f45; overflow-wrap: anywhere; }
+.hist-sub { font-size: 17px; font-style: italic; color: var(--sub); overflow-wrap: anywhere; }
 .hist-rating { display: flex; flex-direction: column; gap: 2px; padding-top: 14px; border-top: 1px solid var(--rule); margin-bottom: -10px; }
 .hist-pips { display: flex; margin-left: -15px; }
 .hist-note { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 6px; padding: 14px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }

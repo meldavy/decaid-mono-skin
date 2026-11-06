@@ -45,7 +45,7 @@ export function ValueSheet({ title, spec, value, choice, onCancel, onDone }: { t
           <span />
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" className="quiet-button" onClick={onCancel}>CANCEL</button>
-            <button type="button" className="save" onClick={() => onDone(v, c)}><DotIcon glyph="check" color="#fff" />DONE</button>
+            <button type="button" className="save" onClick={() => onDone(v, c)}><DotIcon glyph="check" color="var(--on-primary)" />DONE</button>
           </div>
         </div>
       </section>
@@ -76,7 +76,7 @@ export function TextSheet({ label, value, multiline, onCancel, onDone, maxLength
           <span className="label">{multiline ? `${v.length} / 4000` : `${v.length} / ${maxLength ?? 80}`}</span>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" className="quiet-button" onClick={onCancel}>CANCEL</button>
-            <button type="button" className="save" onClick={() => onDone(multiline ? v : v.trim())}><DotIcon glyph="check" color="#fff" />DONE</button>
+            <button type="button" className="save" onClick={() => onDone(multiline ? v : v.trim())}><DotIcon glyph="check" color="var(--on-primary)" />DONE</button>
           </div>
         </div>
       </section>

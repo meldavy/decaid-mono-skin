@@ -45,7 +45,7 @@ const PLAN_TRACE = 8 // plan points per column
 const span = (cell: Cell | null | undefined) => (cell ? Array.from({ length: cell.hi - cell.lo + 1 }, (_, i) => cell.lo + i) : [])
 
 const COLORS = {
-  light: { ink: 'var(--ink)', field: '#EEE6D9', ghost: '#E6DCCC', ghostField: '#CDBBA3', now: '#D9C8AE' },
+  light: { ink: 'var(--ink)', field: 'var(--field)', ghost: 'var(--line)', ghostField: 'var(--line-strong)', now: 'var(--line-mid)' },
   dark: { ink: 'var(--display-cream)', field: 'rgba(237,227,210,0.14)', ghost: 'rgba(237,227,210,0.22)', ghostField: 'rgba(237,227,210,0.42)', now: 'rgba(237,227,210,0.4)' },
 }
 
@@ -152,7 +152,7 @@ export const DotChart = memo(function DotChart({ stages, samples = [], live = fa
   const labelColor = theme === 'dark' ? 'var(--display-label)' : 'var(--taupe)'
   // Where flow lands on a (visible) pressure dot, the flow dot keeps a ring of the pressure colour, so both show.
   const pressureAt = new Set(dots.p.filter((d) => (d.o ?? 1) >= 0.5).map((d) => `${d.x},${d.y}`))
-  const railTones = theme === 'dark' ? ['var(--display-label)', 'rgba(237,227,210,0.28)'] : ['var(--taupe)', '#D9C8AE']
+  const railTones = theme === 'dark' ? ['var(--display-label)', 'rgba(237,227,210,0.28)'] : ['var(--taupe)', 'var(--line-mid)']
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} role="img" aria-label={label} className={theme === 'dark' ? 'grid-patch' : undefined} style={{ display: 'block', flexShrink: 0 }} data-testid="dot-chart" data-pitch={pitch}>
       {dots.field.map((d, i) => <circle key={`fd${i}`} cx={d.x} cy={d.y} r={r} fill={c.field} />)}

@@ -40,7 +40,7 @@
 .set-row-main { all: unset; box-sizing: border-box; cursor: pointer; flex-grow: 1; min-width: 0; min-height: 40px; display: flex; align-items: center; gap: 14px; }
 /* Switch: a pill track with a dot. */
 .switch { width: 58px; height: 34px; flex-shrink: 0; border: 1px solid var(--beige); border-radius: 17px; background: var(--beige-soft); padding: 3px; cursor: pointer; display: flex; align-items: center; transition: background 0.15s; }
-.switch span { width: 26px; height: 26px; border-radius: 13px; background: #fff; box-shadow: 0 1px 3px rgba(46, 33, 25, 0.25); transition: transform 0.15s; }
+.switch span { width: 26px; height: 26px; border-radius: 13px; background: var(--knob); box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.25); transition: transform 0.15s; }
 .switch[aria-checked='true'] { background: var(--accent); border-color: var(--accent); } /* the person's chosen accent */
 .switch[aria-checked='true'] span { transform: translateX(24px); }
 .switch:disabled { opacity: 0.4; cursor: default; }

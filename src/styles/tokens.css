@@ -16,6 +16,16 @@
   --rust-on-display: #e0784a; /* rust, lightened to read on the dark display: waiting states (heating) */
   --accent: #c98b2b;       /* flow / charts; Settings → Mono → chart accent */
   --scrim: rgba(46, 33, 25, 0.42);
+  --scrim-light: rgba(255, 255, 255, 0.84);
+  --sub: #5b4f45;          /* secondary type: provenance, notes */
+  --muted: #9c8870;        /* type on things not yet reached or empty */
+  --line: #e6dccc;         /* card borders, ghosted dots */
+  --line-mid: #d9c8ae;     /* pager dots, axis lines, current-stage dots */
+  --line-strong: #cdbba3;
+  --field: #eee6d9;        /* a chart's unlit dots on the ground */
+  --on-primary: #ffffff;   /* type and icons on brown buttons */
+  --knob: #ffffff;
+  --shadow-rgb: 46, 33, 25;
 
   --dots: 'Doto', monospace;
   --serif: 'Newsreader', Georgia, serif;
@@ -43,6 +53,31 @@
   --tile-gap: 12px;
   --icon-hit: 48px;        /* icon buttons in the header cluster */
   --dot-grid: radial-gradient(rgba(237, 227, 210, 0.09) 1.2px, transparent 1.6px);
+}
+
+/* Dark: Settings → Look & sound → Theme. The ground goes near-black and the type cream; the brown display keeps
+   its colour, so it still stands apart as the one live-data surface. Every colour above has a value here. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: #16120f;
+  --ink: #ede3d2;
+  --taupe: #a3907d;
+  --brown: #c89466;
+  --brown-ink: #e2d3bd;
+  --beige: #3b3029;
+  --beige-soft: #221c18;
+  --rule: #2a221d;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --scrim-light: rgba(22, 18, 15, 0.84);
+  --sub: #c4b29c;
+  --muted: #8a7764;
+  --line: #3b3029;
+  --line-mid: #54463b;
+  --line-strong: #6b5a4b;
+  --field: #2a221d;
+  --on-primary: #1a130e;
+  --knob: #ede3d2;
+  --shadow-rgb: 0, 0, 0;
 }
 
 /* Short screens (e.g. a 1000 × 600 tablet): tighter padding and lower tiles everywhere. Same breakpoint as useShort(). */
@@ -100,7 +135,7 @@ button { font: inherit; color: inherit; }
   border-radius: 26px;
   background: var(--ground);
   border: 1px solid var(--beige);
-  box-shadow: 0 8px 24px rgba(46, 33, 25, 0.12);
+  box-shadow: 0 8px 24px rgba(var(--shadow-rgb), 0.12);
   font-family: var(--serif);
   font-size: 18px;
 }
@@ -120,7 +155,7 @@ button { font: inherit; color: inherit; }
 
 /* Shared action tiles: identical on every screen. */
 .tile { width: var(--tile-w); height: var(--tile-h); border: 1px solid var(--beige); border-radius: var(--radius-tile); background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--brown-ink); }
-.primary { width: var(--primary-w); height: var(--tile-h); border: none; border-radius: var(--radius-tile); background: var(--brown); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; color: #fff; font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; }
+.primary { width: var(--primary-w); height: var(--tile-h); border: none; border-radius: var(--radius-tile); background: var(--brown); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; color: var(--on-primary); font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; }
 .tile:disabled, .primary:disabled { opacity: 0.4; cursor: default; }
 .tile-row { display: flex; gap: var(--tile-gap); }
 .icon-button { width: var(--icon-hit); height: var(--icon-hit); border: none; border-radius: calc(var(--icon-hit) / 2); background: transparent; display: flex; flex-shrink: 0; align-items: center; justify-content: center; cursor: pointer; color: var(--brown); }
@@ -137,7 +172,7 @@ button { font: inherit; color: inherit; }
 
 /* Overlays contrast with what's behind them: white cards get the dark scrim; brown machine messages get a pale one
    that washes the screen out, so the message is the only brown surface. */
-.scrim.light { background: rgba(255, 255, 255, 0.84); }
+.scrim.light { background: var(--scrim-light); }
 .confirm.unsaved { width: 600px; left: calc(50% - 300px); }
 .unsaved-list { display: flex; flex-direction: column; }
 .unsaved-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 10px 0; border-top: 1px solid var(--rule); font-size: 20px; min-width: 0; }
@@ -145,7 +180,7 @@ button { font: inherit; color: inherit; }
 .unsaved-change { display: flex; gap: 10px; align-items: baseline; flex-shrink: 1; min-width: 0; max-width: 60%; }
 
 /* Connection banner: a dark pill heading the toast stack, top centre. */
-.conn-banner { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 22px; box-shadow: 0 8px 24px rgba(46, 33, 25, 0.12); background: var(--display); color: var(--display-cream); font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; pointer-events: none; }
+.conn-banner { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 22px; box-shadow: 0 8px 24px rgba(var(--shadow-rgb), 0.12); background: var(--display); color: var(--display-cream); font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; pointer-events: none; }
 .conn-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--display-label); animation: conn-blink 1s steps(2, start) infinite; }
 @keyframes conn-blink { to { visibility: hidden; } }
 /* Group-head-controller machines: the Brew tile becomes a quiet note. */
@@ -158,6 +193,6 @@ button { font: inherit; color: inherit; }
 /* Dropdown: a short list under its button. */
 .dropdown { position: relative; flex-shrink: 0; }
 .dropdown-catcher { position: fixed; inset: 0; z-index: 40; }
-.dropdown-list { position: absolute; top: calc(100% + 6px); left: 0; z-index: 41; min-width: 200px; padding: 6px 14px; background: var(--ground); border: 1px solid var(--beige); border-radius: 18px; box-shadow: 0 12px 32px rgba(46, 33, 25, 0.14); display: flex; flex-direction: column; }
+.dropdown-list { position: absolute; top: calc(100% + 6px); left: 0; z-index: 41; min-width: 200px; padding: 6px 14px; background: var(--ground); border: 1px solid var(--beige); border-radius: 18px; box-shadow: 0 12px 32px rgba(var(--shadow-rgb), 0.14); display: flex; flex-direction: column; }
 .dropdown-option { all: unset; box-sizing: border-box; cursor: pointer; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 19px; color: var(--ink); border-top: 1px solid var(--rule); }
 .dropdown-option:first-child { border-top: none; }

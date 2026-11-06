@@ -250,7 +250,7 @@ export function ShotScreen() {
           <div className="tile-row">
             <button type="button" className="tile" onClick={skip} disabled={!running || skipping || frame >= stages.length - 1}><DotIcon glyph="next" />NEXT</button>
             <button type="button" className="primary" onClick={stop} disabled={!running || stopping}>
-              <DotIcon glyph="stop" color="#fff" primary />{stopping && running ? 'STOPPING…' : 'STOP'}
+              <DotIcon glyph="stop" color="var(--on-primary)" primary />{stopping && running ? 'STOPPING…' : 'STOP'}
             </button>
           </div>
         </div>
@@ -295,7 +295,7 @@ function DoneBar({ shotId, peak, avgFlow, ratio: shotRatio }: { shotId: string |
           <Readout label="AVG ML/S" value={fixed(avgFlow, 1)} testId="avg-flow" />
         </div>
       </div>
-      <button type="button" className="primary" onClick={dismissShot}><DotIcon glyph="check" color="#fff" primary />DONE</button>
+      <button type="button" className="primary" onClick={dismissShot}><DotIcon glyph="check" color="var(--on-primary)" primary />DONE</button>
       {notesOpen && shotId && <NotesSheet shotId={shotId} rating onClose={(result) => { setNotesOpen(false); if (result) setStars(result.stars) }} />}
     </div>
   )

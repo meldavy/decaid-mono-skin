@@ -213,7 +213,7 @@ function Detail({ record, slot, onMachine, units, busy, onSelect, onEdit, onDupl
           {!record.isDefault && <button type="button" className="chip" disabled={busy} onClick={onDelete}>DELETE</button>}
         </div>
         <button type="button" className="primary lib-select" disabled={busy || onMachine} onClick={onSelect}>
-          <DotIcon glyph="check" color="#fff" primary />{onMachine ? 'SELECTED' : 'SELECT'}
+          <DotIcon glyph="check" color="var(--on-primary)" primary />{onMachine ? 'SELECTED' : 'SELECT'}
         </button>
       </div>
     </article>

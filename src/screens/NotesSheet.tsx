@@ -106,7 +106,7 @@ export function NotesSheet({ shotId, rating = false, onClose }: { shotId: string
           </span>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" className="quiet-button" onClick={() => onClose()}>CANCEL</button>
-            <button type="button" className="save" onClick={save} disabled={status === 'saving' || !loaded}><DotIcon glyph="check" color="#fff" />SAVE</button>
+            <button type="button" className="save" onClick={save} disabled={status === 'saving' || !loaded}><DotIcon glyph="check" color="var(--on-primary)" />SAVE</button>
           </div>
         </div>
       </section>

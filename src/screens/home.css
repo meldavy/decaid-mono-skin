@@ -27,7 +27,7 @@
 .carousel { height: 340px; position: relative; overflow: hidden; touch-action: pan-y; }
 .carousel-track { position: absolute; top: 0; bottom: 0; left: 50%; display: flex; align-items: center; gap: 20px; transition: transform 0.28s ease; will-change: transform; } /* its own layer: moving it never repaints the cards */
 .card-side { width: 280px; height: 280px; flex-shrink: 0; border: none; border-radius: var(--radius-card); background: var(--beige-soft); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; cursor: pointer; text-align: left; }
-.card-side .name { font-size: 26px; line-height: 1.05; color: #5b4f45; }
+.card-side .name { font-size: 26px; line-height: 1.05; color: var(--sub); }
 .card-side.before .name, .card-side.before .label { align-self: flex-end; text-align: right; } /* left of the main card: its right edge is the part that shows */
 /* A slot holds both forms of a card, each on its own layer; the slot's width is the shown form's. A swap flips
    opacity and moves layers, so it's composited, never repainted. */
@@ -37,14 +37,14 @@
 .card-slot > .card-main { margin-top: -170px; }
 .card-slot.is-main > .card-side, .card-slot:not(.is-main) > .card-main { opacity: 0; pointer-events: none; }
 .card-side.empty { background: transparent; border: 1px dashed var(--beige); cursor: default; }
-.card-main { width: 480px; height: 340px; flex-shrink: 0; border: 1px solid #e6dccc; border-radius: 26px; padding: 20px 28px; display: flex; flex-direction: column; justify-content: space-between; background: var(--ground); text-align: left; }
+.card-main { width: 480px; height: 340px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 26px; padding: 20px 28px; display: flex; flex-direction: column; justify-content: space-between; background: var(--ground); text-align: left; }
 /* A card pulled into the middle grows into place. */
 .card-slot.grow.is-main > .card-main { animation: card-grow 0.22s ease-out; }
 @keyframes card-grow { from { transform: scale(0.9); opacity: 0.5; } }
 .card-main .title { font-size: 44px; line-height: 1; letter-spacing: -0.02em; }
-.card-main .provenance { font-size: 18px; font-style: italic; color: #5b4f45; }
+.card-main .provenance { font-size: 18px; font-style: italic; color: var(--sub); }
 .pager { display: flex; justify-content: center; gap: 12px; } /* 6 px dots, 18 px apart */
-.pager span { width: 6px; height: 6px; border-radius: 50%; background: #d9c8ae; }
+.pager span { width: 6px; height: 6px; border-radius: 50%; background: var(--line-mid); }
 .pager span[aria-current='true'] { background: var(--ink); }
 
 .values { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }

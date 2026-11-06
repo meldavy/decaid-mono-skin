@@ -198,7 +198,7 @@ export function RulerSheet({ kind, onClose }: Props) {
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" className="quiet-button" onClick={onClose}>CANCEL</button>
             <button type="button" className="save" onClick={save} disabled={status.kind === 'saving'}>
-              <DotIcon glyph="check" color="#fff" />SAVE
+              <DotIcon glyph="check" color="var(--on-primary)" />SAVE
             </button>
           </div>
         </div>
@@ -222,7 +222,7 @@ function focusLabel(id: ValueId, title?: string) {
 // Only what changes how the value behaves: without a scale, weight targets don't stop anything.
 function note(id: ValueId, hasScale: boolean) {
   if (hasScale) return ''
-  if (id === 'espressoYield') return "No scale: the shot won't stop at weight."
-  if (id === 'hotWaterAmount') return 'No scale: stops by volume.'
+  if (id === 'espressoYield') return 'The shot will stop at this weight when a scale is connected.'
+  if (id === 'hotWaterAmount') return 'Hot water will stop by volume until a scale is connected.'
   return ''
 }

@@ -54,7 +54,7 @@ export function HoldButton({ label, onConfirm, className = 'primary hold' }: Pro
     >
       <span>{label}</span>
       <svg width={DOTS * 9} height={9} viewBox={`0 0 ${DOTS * 9} 9`} aria-hidden>
-        {Array.from({ length: DOTS }, (_, i) => <circle key={i} cx={4.5 + i * 9} cy={4.5} r={2.2} fill="#fff" opacity={i < lit ? 1 : 0.3} />)}
+        {Array.from({ length: DOTS }, (_, i) => <circle key={i} cx={4.5 + i * 9} cy={4.5} r={2.2} fill="var(--on-primary)" opacity={i < lit ? 1 : 0.3} />)}
       </svg>
     </button>
   )

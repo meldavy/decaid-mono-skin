@@ -18,6 +18,7 @@ import { Settings } from './screens/Settings'
 import { Sleep } from './screens/Sleep'
 import { RulerSheet } from './sheets/RulerSheet'
 import { useCompletionChime } from './ui/chime'
+import { useTheme } from './ui/theme'
 import { Toasts } from './ui/toasts'
 import { useShortcuts } from './useShortcuts'
 
@@ -33,6 +34,7 @@ export function App() {
   useEffect(() => {
     document.documentElement.style.setProperty('--accent', ACCENTS[prefs.accent])
   }, [prefs.accent])
+  useTheme(prefs.theme)
 
   useHeartbeat(machineState)
   useWakeProfile(machineState)

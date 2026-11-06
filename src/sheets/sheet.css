@@ -2,7 +2,7 @@
 .scrim { position: absolute; inset: 0; background: var(--scrim); }
 .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 590px; border-radius: 30px 30px 0 0; background: var(--ground); padding: 0 var(--page-pad) var(--page-pad); display: flex; flex-direction: column; justify-content: space-between; }
 .sheet-handle { height: 30px; display: flex; align-items: center; justify-content: center; touch-action: none; cursor: grab; }
-.sheet-handle span { width: 44px; height: 4px; border-radius: 2px; background: #e6dccc; }
+.sheet-handle span { width: 44px; height: 4px; border-radius: 2px; background: var(--line); }
 .sheet-tabs { display: grid; gap: 12px; }
 .sheet-tab { all: unset; box-sizing: border-box; cursor: pointer; height: 132px; padding: 18px 22px; border-radius: 22px; border: 1px solid var(--beige); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
 .sheet-tab[aria-selected='true'] { background: var(--beige); }
@@ -18,7 +18,7 @@
 .preset[aria-pressed='true'] { background: var(--beige); border-color: var(--beige); color: var(--ink); }
 .sheet-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .quiet-button { height: 64px; padding: 0 24px; border: 1px solid var(--beige); border-radius: 20px; background: transparent; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--brown-ink); cursor: pointer; }
-.save { height: 64px; padding: 0 30px 0 24px; border: none; border-radius: var(--radius-tile); background: var(--brown); display: flex; align-items: center; gap: 14px; cursor: pointer; color: #fff; font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; }
+.save { height: 64px; padding: 0 30px 0 24px; border: none; border-radius: var(--radius-tile); background: var(--brown); display: flex; align-items: center; gap: 14px; cursor: pointer; color: var(--on-primary); font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; }
 .save:disabled { opacity: 0.5; }
 .notes-sheet { height: 540px; gap: 20px; justify-content: flex-start; }
 .notes-sheet .sheet-footer { margin-top: auto; }

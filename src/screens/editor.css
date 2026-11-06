@@ -25,11 +25,11 @@
 .ed-axis { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-shrink: 0; }
 .ed-axis[data-dragging='true'] { user-select: none; }
 .ed-axis li.dragging { position: relative; z-index: 2; }
-.ed-axis li.dragging button { background: var(--ground); border-radius: 12px; box-shadow: 0 10px 28px rgba(58, 42, 31, 0.18); }
+.ed-axis li.dragging button { background: var(--ground); border-radius: 12px; box-shadow: 0 10px 28px rgba(var(--shadow-rgb), 0.18); }
 .ed-drop { position: absolute; top: 0; bottom: 0; width: 4px; border-radius: 2px; background: var(--brown); z-index: 1; }
 .ed-axis li { flex-shrink: 0; min-width: 0; padding-right: 6px; }
 .ed-axis button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; flex-direction: column; gap: 8px; min-height: 44px; }
-.ed-axis-line { height: 1px; background: #d9c8ae; }
+.ed-axis-line { height: 1px; background: var(--line-mid); }
 .ed-axis-name { font-size: 18px; line-height: 1.05; color: var(--taupe); }
 .ed-axis-meta { font-size: 10px; }
 .ed-axis li.selected .ed-axis-line { height: 3px; background: var(--brown); }

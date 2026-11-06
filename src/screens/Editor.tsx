@@ -285,7 +285,7 @@ export function Editor({ target, onClose }: Props) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
           {problem && <span className="ed-problem" role="alert" data-testid="ed-problem">{problem}</span>}
-          <button type="button" className="save ed-save" disabled={saving || !dirty} onClick={() => void save()}><DotIcon glyph="check" color="#fff" />SAVE</button>
+          <button type="button" className="save ed-save" disabled={saving || !dirty} onClick={() => void save()}><DotIcon glyph="check" color="var(--on-primary)" />SAVE</button>
         </div>
       </div>
 

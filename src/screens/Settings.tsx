@@ -6,7 +6,7 @@ import { nextWake, type WakeSchedule } from '../domain/schedule'
 import { keyboardResource, withKeyDefaults, type KeyAction, type KeyboardConfig } from '../state/keyboard'
 import { machineConnected, scaleConnected, useLive } from '../state/live'
 import { requestState } from '../state/machine'
-import { ACCENTS, prefsResource, savePref, withDefaults, type Prefs } from '../state/prefs'
+import { ACCENTS, THEMES, prefsResource, savePref, withDefaults, type Prefs } from '../state/prefs'
 import { profiles } from '../state/profiles'
 import { useResource } from '../state/resource'
 import { addSchedule, appSettings, appUpdate, CHARGING, deleteSchedule, display, firmware, forgetDevice, machineAdvanced, machineSettings, plugins, saveMachineAdvanced, saveMachineSetting, presence, SCALE_POWER, saveSetting, savePresence, setBrightness, setDefaultSkin, pluginSettings, savePluginSettings, setPluginEnabled, setRefillLevel, skins, updateSchedule, type AppSettings, type Plugin, type PluginValues } from '../state/settings'
@@ -264,7 +264,7 @@ function ScheduleSheet({ onCancel, onSave }: { onCancel: () => void; onSave: (s:
           <span className="label">{days.length ? '' : 'PICK AT LEAST ONE DAY'}</span>
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" className="quiet-button" onClick={onCancel}>CANCEL</button>
-            <button type="button" className="save" disabled={!days.length} onClick={() => onSave({ time, daysOfWeek: days, enabled: true })}><DotIcon glyph="check" color="#fff" />ADD {time}</button>
+            <button type="button" className="save" disabled={!days.length} onClick={() => onSave({ time, daysOfWeek: days, enabled: true })}><DotIcon glyph="check" color="var(--on-primary)" />ADD {time}</button>
           </div>
         </div>
       </section>
@@ -301,7 +301,7 @@ function TimeSheet({ title, minutes, onCancel, onSave }: { title: string; minute
           <span />
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" className="quiet-button" onClick={onCancel}>CANCEL</button>
-            <button type="button" className="save" onClick={() => onSave(hour * 60 + minute)}><DotIcon glyph="check" color="#fff" />DONE</button>
+            <button type="button" className="save" onClick={() => onSave(hour * 60 + minute)}><DotIcon glyph="check" color="var(--on-primary)" />DONE</button>
           </div>
         </div>
       </section>
@@ -413,6 +413,7 @@ function Maintenance({ run }: { run: Run }) {
 
 // ── Look & sound ────────────────────────────────────────────────────────────────────────────────────
 
+const THEME_NAMES: Record<Prefs['theme'], string> = { light: 'Light', dark: 'Dark', auto: 'Match the tablet' }
 const ACCENT_NAMES: Record<keyof typeof ACCENTS, string> = { crema: 'Crema', rust: 'Rust', slate: 'Slate blue', teal: 'Teal' }
 
 function LookSound({ run }: { run: Run; setEdit: SetEdit }) {
@@ -420,6 +421,9 @@ function LookSound({ run }: { run: Run; setEdit: SetEdit }) {
   const set = <K extends keyof Prefs>(k: K, v: Prefs[K]) => run(() => savePref(k, v))
   return (
     <>
+      <Card eyebrow="APPEARANCE" title="Theme">
+        <RadioList label="Theme" showLabel={false} value={prefs.theme} onChange={(k) => set('theme', k)} options={THEMES.map((k) => [k, THEME_NAMES[k]])} />
+      </Card>
       <Card eyebrow="CHARTS" title="Flow colour">
         <RadioList label="Flow colour" showLabel={false} value={prefs.accent} onChange={(k) => set('accent', k)} options={(Object.keys(ACCENTS) as (keyof typeof ACCENTS)[]).map((k) => [k, ACCENT_NAMES[k], <svg key="dots" width={45} height={18} aria-hidden>{[0, 1, 2, 3, 4].map((i) => <circle key={i} cx={4.5 + i * 9} cy={9} r={3} fill={ACCENTS[k]} />)}</svg>])} />
       </Card>
@@ -539,7 +543,7 @@ function ConfirmDialogPlain({ title, body, confirm, onCancel, onConfirm }: { tit
         {body && <span className="confirm-body">{body}</span>}
         <div className="confirm-actions">
           <button type="button" className="quiet-button" onClick={onCancel}>CANCEL</button>
-          <button type="button" className="save" onClick={onConfirm}><DotIcon glyph="check" color="#fff" />{confirm}</button>
+          <button type="button" className="save" onClick={onConfirm}><DotIcon glyph="check" color="var(--on-primary)" />{confirm}</button>
         </div>
       </section>
     </div>
@@ -690,7 +694,7 @@ function PluginSettingsSheet({ plugin, onClose }: { plugin: Plugin; onClose: () 
           <div style={{ display: 'flex', gap: 10 }}>
             {/* Nothing to save until the settings have loaded. */}
             <button type="button" className="quiet-button" onClick={onClose}>{saved ? 'CANCEL' : 'CLOSE'}</button>
-            {saved && <button type="button" className="save" disabled={saving || !!badNumber} onClick={save}><DotIcon glyph="check" color="#fff" />SAVE</button>}
+            {saved && <button type="button" className="save" disabled={saving || !!badNumber} onClick={save}><DotIcon glyph="check" color="var(--on-primary)" />SAVE</button>}
           </div>
         </div>
       </section>

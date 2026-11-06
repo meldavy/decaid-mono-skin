@@ -32,7 +32,7 @@ export function ProfileDetail({ record, slot, onMachine, units, tall = false }: 
         <DotChart stages={stages} cols={chartCols(chartWidth, DISPLAY_PITCH)} rows={(short ? 9 : 13) + (tall ? 4 : 0)} axis rail label={`${p.title}: pressure and flow by stage`} />
         <div className={`legend${legendCols === 3 ? ' legend-3' : ''} label`}>
           {legend.items.map((it) => (
-            <span key={it.no} className="legend-item"><span className="legend-dot" style={{ background: it.tone ? '#D9C8AE' : 'var(--taupe)' }} /><span>{it.no}</span><span className="legend-name one-line">{it.name}</span><span>{it.dur}</span></span>
+            <span key={it.no} className="legend-item"><span className="legend-dot" style={{ background: it.tone ? 'var(--line-mid)' : 'var(--taupe)' }} /><span>{it.no}</span><span className="legend-name one-line">{it.name}</span><span>{it.dur}</span></span>
           ))}
           {legend.more > 0 && <span className="legend-item">+{legend.more} MORE</span>}
         </div>

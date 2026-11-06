@@ -49,7 +49,7 @@ export function ConnectScale({ onClose }: { onClose: () => void }) {
         {failed && <span className="confirm-body" role="alert">Couldn't connect to {failed}. Make sure it's on and close by, then try again.</span>}
         <div className="confirm-actions">
           <button type="button" className="quiet-button" onClick={onClose}>{connected ? 'DONE' : 'CANCEL'}</button>
-          <button type="button" className="save" disabled={scanning} onClick={() => void scan()}><DotIcon glyph="search" color="#fff" />LOOK AGAIN</button>
+          <button type="button" className="save" disabled={scanning} onClick={() => void scan()}><DotIcon glyph="search" color="var(--on-primary)" />LOOK AGAIN</button>
         </div>
       </section>
     </div>

@@ -177,7 +177,7 @@ function resultText(s: ShotSummary | null) {
 function Dots({ stars, size, label }: { stars: number; size: number; label: string }) {
   return (
     <span className="hist-rate" aria-label={label} role="img">
-      {[1, 2, 3, 4, 5].map((i) => <span key={i} style={{ width: size, height: size, background: i <= stars ? 'var(--brown)' : '#E6DCCC' }} />)}
+      {[1, 2, 3, 4, 5].map((i) => <span key={i} style={{ width: size, height: size, background: i <= stars ? 'var(--brown)' : 'var(--line)' }} />)}
     </span>
   )
 }
@@ -264,7 +264,7 @@ function ShotDetail({ shot, summary, clockFormat, canUpload, uploading, onRate, 
         <div className="chips">
           {canUpload && <button type="button" className="pill" disabled={uploading} onClick={onUpload}>{uploading ? 'UPLOADING…' : 'UPLOAD'}</button>}
         </div>
-        <button type="button" className="primary lib-select" disabled={!shot.workflow?.profile} onClick={onBrewAgain}><DotIcon glyph="brew" color="#fff" primary />BREW AGAIN</button>
+        <button type="button" className="primary lib-select" disabled={!shot.workflow?.profile} onClick={onBrewAgain}><DotIcon glyph="brew" color="var(--on-primary)" primary />BREW AGAIN</button>
       </div>
     </section>
   )

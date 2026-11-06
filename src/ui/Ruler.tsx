@@ -41,7 +41,7 @@ export function Ruler({ value, min, max, step, decimals, onChange, label, compac
     const inRange = v >= min - 1e-9 && v <= max + 1e-9
     const major = index % 10 === 0
     const mid = index % 5 === 0
-    ticks.push({ i, v, inRange, major, size: major ? 9 : mid ? 6 : 4, color: !inRange ? 'transparent' : major ? 'var(--taupe)' : mid ? '#CDBBA3' : '#E6DCCC' })
+    ticks.push({ i, v, inRange, major, size: major ? 9 : mid ? 6 : 4, color: !inRange ? 'transparent' : major ? 'var(--taupe)' : mid ? 'var(--line-strong)' : 'var(--line)' })
   }
   const majors = ticks.filter((t) => t.major && t.inRange)
 

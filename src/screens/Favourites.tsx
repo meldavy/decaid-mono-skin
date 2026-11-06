@@ -180,7 +180,7 @@ export function Favourites({ onBack, onEdit }: Props) {
 
       <div className="favs-foot">
         <span />
-        <button type="button" className="save" disabled={saving} onClick={async () => { if (await save()) onBack() }}><DotIcon glyph="check" color="#fff" />DONE</button>
+        <button type="button" className="save" disabled={saving} onClick={async () => { if (await save()) onBack() }}><DotIcon glyph="check" color="var(--on-primary)" />DONE</button>
       </div>
 
       {drag && (

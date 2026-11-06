@@ -39,7 +39,7 @@ export function UnsavedDialog({ context, changes, onDiscard, onKeep, onSave }: P
             <button type="button" className="quiet-button" onClick={onDiscard}>DISCARD</button>
             <button type="button" className="quiet-button" onClick={onKeep}>KEEP EDITING</button>
           </div>
-          <button type="button" className="save" onClick={onSave}><DotIcon glyph="check" color="#fff" />SAVE</button>
+          <button type="button" className="save" onClick={onSave}><DotIcon glyph="check" color="var(--on-primary)" />SAVE</button>
         </div>
       </section>
     </div>
