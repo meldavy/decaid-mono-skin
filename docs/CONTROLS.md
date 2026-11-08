@@ -151,6 +151,7 @@ Apply every line to every control while writing its scenarios; anything that app
 | SHEET-17 | Outside change while the sheet is open → untouched values refresh; edited value kept and flagged | I |
 | SHEET-18 | °F: rulers, presets and steps in °F; values stored in °C | U |
 | SHEET-19 | Repeat-tapping Save sends once | S |
+| SHEET-20 | Temperature sheet MILK tab: Decaid's steam stop-at-temperature, 40–80 °C or OFF (0); saved as steamSettings.stopAtTemperature; note says it only stops on a Bengle or a DE1 with an external temperature probe | U |
 
 ## RUN — steam / hot water / flush modals
 
@@ -167,6 +168,9 @@ Apply every line to every control while writing its scenarios; anything that app
 | RUN-09 | Link lost during a run → modal stays with "lost connection", Stop retried on reconnect | I |
 | RUN-10 | Icon animates at 2 fps; holds still with reduced motion | S |
 | RUN-11 | Modal can't be dismissed except by Stop or the machine finishing | S |
+| RUN-12 | Steam milk temperature comes from the sensor Decaid stops on: Bengle milk probe first, else the first sensor with a numeric temperature channel | U |
+| RUN-13 | Steam with a stop temperature: a non-zero milk reading switches the bar (first reading → stop temperature) and caption to temperature; none by the 5 s grace period → timer; no stop temperature → timer | U |
+| RUN-14 | Milk reading lost (none non-zero for 2 s) → back to the timer, which kept running, caption says so; switches back when readings return | U |
 
 ## LIVE — live shot
 

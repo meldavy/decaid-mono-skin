@@ -3,7 +3,7 @@ import type { Profile } from '../domain/profile'
 import type { Workflow, WorkflowPatch } from '../state/workflow'
 
 export type ValueId =
-  | 'espressoTemp' | 'hotWaterTemp' | 'steamTemp'
+  | 'espressoTemp' | 'hotWaterTemp' | 'steamTemp' | 'milkTemp'
   | 'dose' | 'espressoYield' | 'hotWaterAmount'
   | 'shotTarget' | 'hotWaterMax' | 'steamMax' | 'flushTime'
 
@@ -24,6 +24,8 @@ export const VALUES: Record<ValueId, ValueSpec> = {
   espressoTemp: { id: 'espressoTemp', label: 'ESPRESSO', unit: 'temp', min: 80, max: 100, step: 0.5, decimals: 1, presets: [88, 90, 92, 94, 96], where: 'profile' },
   hotWaterTemp: { id: 'hotWaterTemp', label: 'HOT WATER', unit: 'temp', min: 40, max: 100, step: 1, decimals: 0, presets: [70, 75, 80, 85, 90], where: 'workflow' },
   steamTemp: { id: 'steamTemp', label: 'STEAM', unit: 'temp', min: 135, max: 160, step: 1, decimals: 0, presets: [140, 145, 150, 155, 160], off: 0, where: 'workflow' },
+  // Steam stops when the milk reaches this (Decaid's stop-at-temperature; 0 = off). Decaid accepts 0–80 °C.
+  milkTemp: { id: 'milkTemp', label: 'MILK', unit: 'temp', min: 40, max: 80, step: 1, decimals: 0, presets: [55, 60, 62, 65], off: 0, where: 'workflow' },
   dose: { id: 'dose', label: 'DOSE', unit: 'g', min: 5, max: 30, step: 0.1, decimals: 1, presets: [16, 17, 18, 19, 20], where: 'profile' },
   // Allongés run well past 100 g.
   espressoYield: { id: 'espressoYield', label: 'ESPRESSO', unit: 'g', min: 10, max: 250, step: 0.1, decimals: 1, presets: [32, 36, 40, 45, 50], where: 'profile' },
@@ -35,7 +37,7 @@ export const VALUES: Record<ValueId, ValueSpec> = {
 }
 
 export const SHEETS = {
-  temp: ['espressoTemp', 'hotWaterTemp', 'steamTemp'],
+  temp: ['espressoTemp', 'hotWaterTemp', 'steamTemp', 'milkTemp'],
   dose: ['dose'],
   yield: ['espressoYield', 'hotWaterAmount'],
   time: ['shotTarget', 'hotWaterMax', 'steamMax', 'flushTime'],
@@ -55,6 +57,7 @@ export function readValue(id: ValueId, wf: Workflow, shotTarget: number): number
     case 'espressoTemp': return wf.profile.steps[0]?.temperature ?? 0
     case 'hotWaterTemp': return wf.hotWaterData.targetTemperature
     case 'steamTemp': return wf.steamSettings.targetTemperature < 135 ? 0 : wf.steamSettings.targetTemperature
+    case 'milkTemp': { const v = wf.steamSettings.stopAtTemperature ?? 0; return v < 40 ? 0 : Math.min(80, v) }
     case 'dose': return wf.context?.targetDoseWeight ?? 0
     case 'espressoYield': return wf.context?.targetYield ?? 0
     case 'hotWaterAmount': return wf.hotWaterData.volume
@@ -83,6 +86,7 @@ export function workflowPatch(changes: Partial<Record<ValueId, number>>, wf: Wor
       case 'espressoTemp': patch.profile = shiftProfileTemperature(wf.profile, v); break
       case 'hotWaterTemp': set('hotWaterData', 'targetTemperature', v); break
       case 'steamTemp': set('steamSettings', 'targetTemperature', v); break
+      case 'milkTemp': set('steamSettings', 'stopAtTemperature', v); break
       case 'dose': set('context', 'targetDoseWeight', v); break
       case 'espressoYield': set('context', 'targetYield', v); break
       case 'hotWaterAmount': set('hotWaterData', 'volume', v); break

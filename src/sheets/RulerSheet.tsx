@@ -171,7 +171,7 @@ export function RulerSheet({ kind, onClose }: Props) {
         </div>
 
         {isOff ? (
-          <div className="sheet-off label">STEAM HEATER OFF</div>
+          <div className="sheet-off label">{tab === 'milkTemp' ? 'AUTO STOP OFF' : 'STEAM HEATER OFF'}</div>
         ) : (
           <Ruler value={shown} min={spec.min} max={spec.max} step={spec.step} decimals={spec.decimals} label={`${VALUES[tab].label} ruler`} onChange={(v) => setValue(tab, fromShown(VALUES[tab], units, v))} />
         )}
@@ -215,6 +215,7 @@ function focusLabel(id: ValueId, title?: string) {
     case 'steamMax': return 'STEAM · LONGEST RUN'
     case 'flushTime': return 'FLUSH · HOW LONG'
     case 'hotWaterAmount': return 'HOT WATER · AMOUNT'
+    case 'milkTemp': return 'MILK · STOP STEAMING AT'
     default: return VALUES[id].label
   }
 }
@@ -222,6 +223,7 @@ function focusLabel(id: ValueId, title?: string) {
 // What the value does, where that isn't obvious: the shot target stops nothing, and without a scale weight targets don't either.
 function note(id: ValueId, hasScale: boolean) {
   if (id === 'shotTarget') return 'This is your shot target time, a baseline used to compare against your actual shot finish time.'
+  if (id === 'milkTemp') return 'The machine will auto stop steaming at this configured milk temperature, only for Bengle machines or DE1 with an external temperature probe.'
   if (hasScale) return ''
   if (id === 'espressoYield') return 'The shot will stop at this weight when a scale is connected.'
   if (id === 'hotWaterAmount') return 'Hot water will stop by volume until a scale is connected.'

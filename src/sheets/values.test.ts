@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Workflow } from '../state/workflow'
-import { shiftProfileTemperature, snap, VALUES, workflowPatch } from './values'
+import { readValue, shiftProfileTemperature, snap, VALUES, workflowPatch } from './values'
 
 const wf = {
   id: 'w', name: 'w',
@@ -64,5 +64,17 @@ describe('SHEET-12 ratio', () => {
     expect(ratio(40, 18)).toBe('1:2.2')
     expect(ratio(45.5, 17)).toBe('1:2.7')
     expect(ratio(36, 0)).toBe('—')
+  })
+})
+
+describe('milk stop temperature', () => {
+  it('SHEET-20 reads stopAtTemperature, 0 (or anything under 40) as off, and writes it with the other steam fields', () => {
+    expect(readValue('milkTemp', wf, 0)).toBe(0) // not set
+    expect(readValue('milkTemp', { ...wf, steamSettings: { ...wf.steamSettings, stopAtTemperature: 60 } }, 0)).toBe(60)
+    expect(readValue('milkTemp', { ...wf, steamSettings: { ...wf.steamSettings, stopAtTemperature: 5 } }, 0)).toBe(0)
+    expect(snap(0, VALUES.milkTemp)).toBe(0)
+    expect(snap(95, VALUES.milkTemp)).toBe(80)
+    expect(workflowPatch({ milkTemp: 62, steamTemp: 155 }, wf)).toEqual({ steamSettings: { stopAtTemperature: 62, targetTemperature: 155 } })
+    expect(workflowPatch({ milkTemp: 0 }, wf)).toEqual({ steamSettings: { stopAtTemperature: 0 } })
   })
 })
