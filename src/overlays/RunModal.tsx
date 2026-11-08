@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { SCALE_STALE_MS, scaleConnected, useLive } from '../state/live'
 import { requestState } from '../state/machine'
+import { milkProgress, steamMode, useMilkTemperature, type SteamMode } from '../state/milk'
 import { prefsResource, withDefaults } from '../state/prefs'
 import { useNow, useResource } from '../state/resource'
 import { workflow } from '../state/workflow'
@@ -27,6 +28,7 @@ export function RunModal({ kind }: { kind: RunKind }) {
   const linkOpen = live.link === 'open'
   const hasScale = scaleConnected(live.devices)
   const m = live.machine
+  const milk = useMilkTemperature(kind === 'steam')
 
   // Hot water volume without a scale: integrate the machine's flow.
   useEffect(() => {
@@ -66,17 +68,28 @@ export function RunModal({ kind }: { kind: RunKind }) {
   let readings: Reading[] = []
   let progress = 0
   let caption = ''
+  let mode: SteamMode | undefined
 
   if (kind === 'steam') {
     const s = wf?.steamSettings
     title = 'STEAMING'; eyebrow = 'STEAM WAND'; glyph = 'steam'
-    readings = [
-      { label: 'TIME', value: String(elapsed), unit: 'S', target: s ? `of ${s.duration} s` : '' },
-      { label: 'FLOW', value: fixed(m?.flow, 1), unit: 'ML/S', target: s ? `set to ${s.flow.toFixed(1)} ml/s` : '' },
-      { label: 'STEAM', value: t(m?.steamTemperature), unit: tl, target: s ? `set to ${t(s.targetTemperature)}°` : '' },
-    ]
-    progress = s ? exact / s.duration : 0
-    caption = s ? `${elapsed} OF ${s.duration} S` : ''
+    // With a stop temperature and a live milk reading, the bar and caption follow the milk; otherwise (or when the
+    // reading drops out) the timer, which keeps running underneath either way.
+    const stopAt = s?.stopAtTemperature ?? 0
+    mode = steamMode(stopAt, milk, startedAt.current, now)
+    const timeReading = { label: 'TIME', value: String(elapsed), unit: 'S', target: s ? `of ${s.duration} s` : '' }
+    const steamReading = { label: 'STEAM', value: t(m?.steamTemperature), unit: tl, target: s ? `set to ${t(s.targetTemperature)}°` : '' }
+    readings = stopAt > 0
+      ? [{ label: 'MILK', value: mode === 'temperature' ? t(milk.celsius ?? undefined) : NONE, unit: tl, target: `stops at ${t(stopAt)}°` }, timeReading, steamReading]
+      : [timeReading, { label: 'FLOW', value: fixed(m?.flow, 1), unit: 'ML/S', target: s ? `set to ${s.flow.toFixed(1)} ml/s` : '' }, steamReading]
+    if (mode === 'temperature') {
+      progress = milkProgress(milk, stopAt)
+      caption = `${t(milk.celsius ?? undefined)}° OF ${t(stopAt)}° — STOPS AT TEMPERATURE`
+    } else {
+      progress = s ? exact / s.duration : 0
+      const why = mode === 'waiting' ? ' — WAITING FOR MILK READING' : mode === 'lost' ? ' — MILK READING LOST' : ''
+      caption = s ? `${elapsed} OF ${s.duration} S${why}` : ''
+    }
   } else if (kind === 'hotWater') {
     const h = wf?.hotWaterData
     const amount = hasScale ? (now - live.scaleAt < SCALE_STALE_MS ? live.scale?.weight : undefined) : volume.current.ml
@@ -105,7 +118,7 @@ export function RunModal({ kind }: { kind: RunKind }) {
   return (
     <div className="run-layer">
       <div className="scrim light" />
-      <section className="run display" role="dialog" aria-modal="true" aria-label={title} data-testid="run-modal" data-kind={kind}>
+      <section className="run display" role="dialog" aria-modal="true" aria-label={title} data-testid="run-modal" data-kind={kind} data-mode={mode}>
         <div className="run-head">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <span className="label">{eyebrow}</span>
