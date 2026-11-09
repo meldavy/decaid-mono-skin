@@ -203,7 +203,7 @@ test.describe('Settings', () => {
     const seen = writes(page)
     await open(page, 'Devices & water')
     await setValue(page, /^Warn when the tank is below/, 20)
-    await expect.poll(() => seen).toContainEqual({ method: 'POST', path: '/api/v1/machine/waterLevels', body: { refillLevel: 15 } })
+    await expect.poll(() => seen).toContainEqual({ method: 'POST', path: '/api/v1/machine/waterLevels', body: { refillLevel: 6 } }) // 20% of 1453 ml is 291: 11 mm, less the 5 mm correction
   })
 
   test('SET-09 maintenance: release early cancels, hold starts cleaning', async ({ page }) => {

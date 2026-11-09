@@ -31,13 +31,13 @@ test.describe('Refill tank', () => {
     const level = await tank(page)
     const m = await machine(page)
     await page.goto('/')
-    await expect(page.getByTestId('tank')).toHaveText('54') // 40 mm is 1104 of 2058 ml
+    await expect(page.getByTestId('tank')).toHaveText('88') // 40 mm + 5 is 1277 of a full 1453 ml
     level.currentLevel = 4
     m.needsWater = true
     await expect(refill(page)).toBeVisible()
     await expect(refill(page)).toContainText('REFILL')
-    await expect(page.getByTestId('tank-pct')).toHaveText('5%') // 4 mm, 97 ml
-    await expect(refill(page)).toContainText('NEEDS 6% TO BREW') // 5 mm, 124 ml
+    await expect(page.getByTestId('tank-pct')).toHaveText('16%') // 4 mm + 5, 233 ml
+    await expect(refill(page)).toContainText('NEEDS 18% TO BREW') // 5 mm + 5, 261 ml
     level.currentLevel = 45
     m.needsWater = false
     await expect(refill(page)).toBeHidden()
@@ -47,7 +47,7 @@ test.describe('Refill tank', () => {
     const level = await tank(page)
     await machine(page)
     await page.goto('/')
-    await expect(page.getByTestId('tank')).toHaveText('54')
+    await expect(page.getByTestId('tank')).toHaveText('88')
     for (const mm of [6, 5, 4, 5, 6, 4, 3]) {
       level.currentLevel = mm
       await page.waitForTimeout(250)
